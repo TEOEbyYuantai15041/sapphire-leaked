@@ -1,6 +1,3 @@
--- [PAUSED AT LOADSTRING]
--- Chunk Name: nil
-
 Players = game:GetService("Players")
 LocalPlayer = Players.LocalPlayer
 Lighting = game:GetService("Lighting")
@@ -14,12 +11,12 @@ Workspace = game:GetService("Workspace")
 SoundService = game:GetService("SoundService")
 Debris = game:GetService("Debris")
 
-if LocalPlayer:GetAttribute("SapphireLoaded") then 
+if LocalPlayer:GetAttribute("NectarLoaded") then 
 print("[防重复加载] 脚本已结束")
 return
 end
 
-LocalPlayer:SetAttribute("SapphireLoaded", true)
+LocalPlayer:SetAttribute("NectarLoaded", true)
 
 notifysound = 4590657391
 
@@ -27,6 +24,9 @@ PlayingSound = true
 promptReachMultiplier = 2.0
 
 Floor = ReplicatedStorage.GameData.Floor
+
+GameData = ReplicatedStorage:WaitForChild("GameData")
+LatestRoom = GameData:WaitForChild("LatestRoom")
 
 RemoteFolder = ReplicatedStorage:FindFirstChild("RemotesFolder")
 MainGame = LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game
@@ -122,11 +122,48 @@ end)
 end
 end)()
 
+function setcantouch(Part, Value)
+if Part:IsA("Model") then
+for _, v in ipairs(Part:GetChildren()) do
+if v:IsA("BasePart") then
+v.CanTouch = Value
+end
+end
+elseif Part:IsA("BasePart") then
+Part.CanTouch = Value
+end
+end
+
+local hubFolder = "Sapphire"
+local addonFolder = hubFolder.."/Addons"
+local UIStyleFile = hubFolder.."/UIStyle.txt"
+
+if not isfolder(hubFolder) then
+makefolder(hubFolder)
+end
+
+if not isfolder(addonFolder) then
+makefolder(addonFolder)
+end
+
+if not isfile(UIStyleFile) then
+writefile("UIStyle.txt","Obsidian")
+end
+
+savedUIStyle = "Obsidian"
+if readfile and isfile(UIStyleFile) then
+local success, content = pcall(readfile, UIStyleFile)
+if success and (content == "Obsidian" or content == "Linoria") then
+savedUIStyle = content
+end
+end
+UIStyle = savedUIStyle
+
 Pathnode = Instance.new("Folder",workspace)
 Pathnode.Name = "Path Node"
 
 local repo
-if UIStyle == "LinoriaLib" then
+if UIStyle == "Linoria" then
 repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
 else
 repo = 'https://raw.githubusercontent.com/mstudio45/Obsidian/main/'
@@ -152,81 +189,38 @@ Library.NotifySide = "Right"
 
 Connections = {}
 
-Library:Notify("正在加载 Sapphire | Doors",5)
+Library:Notify("正在加载 Nectar | Doors",5)
 
 Window = Library:CreateWindow({
-Title = '💎 Sapphire',
-Footer = "LEAKED BY YUANTAI15041(3657198102)",
+Title = 'Nectar',
+Footer = "楼层："..Floor.Value.." | 版本：2.1.3",
 Center = true,
 NotifySide = "Right",
 AutoShow = true
 })
 
-if UIStyle == "LinoriaLib" then
 Tabs = {
-Homepage = Window:AddTab("主页"),
-Player = Window:AddTab("玩家"),
-Exploits = Window:AddTab("漏洞"),
-Visuals = Window:AddTab("视觉"),
-Floor = Window:AddTab("楼层"),
-UISettings = Window:AddTab("配置"),
-Info = Window:AddTab("信息"),
-Addons = Window:AddTab("插件"),
+Homepage = Window:AddTab("主页","house","首页信息"),
+Player = Window:AddTab("玩家","user","基础功能"),
+Exploits = Window:AddTab("漏洞","bug","利用Doors游戏漏洞"),
+Visuals = Window:AddTab("视角","scan-eye","渲染&通知"),
+Floor = Window:AddTab("楼层","sparkles","基于楼层"),
+Development = Window:AddTab("","terminal","实验性功能"),
+UISettings = Window:AddTab("配置","settings","用户界面&预设"),
+Addons = Window:AddTab("插件","boxes","Nectar的社区插件"),
 }
-else
-Tabs = {
-Homepage = Window:AddTab({
-Name = "主页",
-Description = "首页信息", 
-Icon = "house"
-}),
-Player = Window:AddTab({
-Name = "玩家",
-Description = "基础功能", 
-Icon = "user"
-}),
-Exploits = Window:AddTab({
-Name = "漏洞",
-Description = "利用Doors游戏漏洞", 
-Icon = "bug"
-}),
-Visuals = Window:AddTab({
-Name = "视觉",
-Description = "渲染&通知", 
-Icon = "scan-eye"
-}),
-Floor = Window:AddTab({
-Name = "楼层",
-Description = "基于楼层", 
-Icon = "sparkles"
-}),
-UISettings = Window:AddTab({
-Name = "配置",
-Description = "用户界面&预设", 
-Icon = "settings"
-}),
-Info = Window:AddTab({
-Name = "信息",
-Description = "关于Sapphire的信息", 
-Icon = "info"
-}),
-Addons = Window:AddTab({
-Name = "插件",
-Description = "Sapphire的社区插件", 
-Icon = "boxes"
-})
-}
-end
 
 User = Tabs.Homepage:AddLeftGroupbox("用户信息","user-round")
-Info = Tabs.Homepage:AddRightGroupbox("信息","info")
+TabBox1 = Tabs.Homepage:AddRightTabbox()
+KeyInfo = TabBox1:AddTab("密钥信息")
+Info = TabBox1:AddTab("贡献者信息")
 
 Movement = Tabs.Player:AddLeftGroupbox("移动")
-Automation = Tabs.Player:AddRightGroupbox('自动化')
+Automation = Tabs.Player:AddRightGroupbox('��')
 ReachBox = Tabs.Player:AddLeftGroupbox('距离')
 MiscBox = Tabs.Player:AddRightGroupbox("杂项")
 
-Anti = Tabs.Exploits:AddLeftGroupbox('防止实体')
+Anti = Tabs.Exploits:AddLeftGroupbox('防所有实体')
 Bypass = Tabs.Exploits:AddRightGroupbox('绕过')
 Troll = Tabs.Exploits:AddLeftGroupbox('恶搞')
 
@@ -236,21 +230,24 @@ SettingsESP = TabBox:AddTab('设置')
 TabBox2 = Tabs.Visuals:AddRightTabbox()
 NotifyBox = TabBox2:AddTab('通知')
 NySet = TabBox2:AddTab('设置')
-Ambient = Tabs.Visuals:AddLeftGroupbox("环境")
+Ambient = Tabs.Visuals:AddLeftGroupbox("?")
 TabBox3 = Tabs.Visuals:AddRightTabbox()
-Self = TabBox3:AddTab('自己')
+Self = TabBox3:AddTab('��')
 Effect = TabBox3:AddTab('效果')
 
 FloorAnti = Tabs.Floor:AddLeftGroupbox('楼层绕过')
 Other = Tabs.Floor:AddRightGroupbox("其它")
-ModifiersBox = Tabs.Floor:AddLeftGroupbox('修饰符')
+ModifiersBox = Tabs.Floor:AddLeftGroupbox('��')
 Farm = Tabs.Floor:AddLeftGroupbox("农场")
+
+ModuleBox = Tabs.Development:AddLeftGroupbox("模块")
+AdminPanel = Tabs.Development:AddRightGroupbox("管理员面板")
 
 SettingsBox = Tabs.UISettings:AddLeftGroupbox('UI','wrench')
 
 Tabs.Homepage:UpdateWarningBox({
 Title = "更新日志：",
-Text = "//Doors//\n<font color=\"rgb(73,230,133)\">修复防 Jamming\n修复UI样式LinoriaLib\n改进假死</font>",
+Text = "//Doors//\n<font color=\"rgb(73,230,133)\">新防 Monument</font>",
 IsNormal = true,
 Visible = true,
 LockSize = true,
@@ -282,39 +279,140 @@ end
 end
 })
 
-Info:AddLabel("[<font color=\"rgb(73,230,133)\">麤欻飍𠯶貤鬯𥫗𠔉�</font>] LEAKER")
-
-Movement:AddToggle('SpeedBoost', {
-    Text = "移动速度",
-    Default = false,
-Callback = function(Value)
-if Character and Character.Humanoid then
-if Value then
-Character.Humanoid.WalkSpeed = Speed
+local HttpService = game:GetService("HttpService")
+HttpService.HttpEnabled = true
+local function formatRemaining(expiresAtStr)
+if not expiresAtStr or expiresAtStr == "" then
+return "永久"
+end
+local success, dateTime = pcall(DateTime.fromIsoDate, expiresAtStr)
+if not success then
+return "日期格式无效"
+end
+local target = dateTime.UnixTimestamp
+local now = os.time()
+local remain = target - now
+local absRemain = math.abs(remain)
+local days = math.floor(absRemain / 86400)
+local hours = math.floor((absRemain % 86400) / 3600)
+local minutes = math.floor((absRemain % 3600) / 60)
+local seconds = absRemain % 60
+if remain >= 0 then
+return string.format(" %d天 %02d时 %02d分 %02d秒", days, hours, minutes, seconds)
 else
-Character.Humanoid.WalkSpeed = 16
+return "已过期"
 end
 end
+local keyValueLabel = KeyInfo:AddLabel("密钥: 加载中...")
+local remainingLabel = KeyInfo:AddLabel("密钥期限: 加载中...")
+local function updateKeyInfo()
+task.spawn(function()
+local keyFilePath = "Sapphire_key.txt"
+local keyValue = nil
+if isfile(keyFilePath) then
+local content = readfile(keyFilePath)
+keyValue = content:gsub("^%s+", ""):gsub("%s+$", "")
 end
+local displayKey = keyValue or ""
+if #displayKey > 15 then
+displayKey = string.sub(displayKey, 1, 15) .. "..."
+end
+keyValueLabel:SetText("密钥: " .. displayKey)
+local API_KEY = "f940a405-0204-4ec5-9a8d-d59bb0a068ed"
+local API_URL = "https://api.jnkie.com/api/v2/keys/" .. keyValue
+local requestParams = {
+Url = API_URL,
+Method = "GET",
+Headers = {
+["Authorization"] = "Bearer " .. API_KEY,
+["Accept"] = "application/json"
+}
+}
+local success, response = pcall(function()
+return HttpService:RequestAsync(requestParams)
+end)
+if not success then
+remainingLabel:SetText("密钥期限: API请求失败")
+return
+end
+if response.StatusCode ~= 200 then
+remainingLabel:SetText("密钥期限: HTTP " .. response.StatusCode)
+return
+end
+local decodeOk, decoded = pcall(function()
+return HttpService:JSONDecode(response.Body)
+end)
+if not decodeOk then
+return
+end
+local keysList = nil
+if type(decoded) == "table" then
+if #decoded > 0 or next(decoded) == nil then
+keysList = decoded
+elseif decoded.keys and type(decoded.keys) == "table" then
+keysList = decoded.keys
+elseif decoded.data and type(decoded.data) == "table" then
+keysList = decoded.data
+else
+keysList = { decoded }
+end
+else
+return
+end
+local foundKey = nil
+for _, key in ipairs(keysList) do
+local keyInfo = key.key or key
+if keyInfo.key_value == keyValue then
+foundKey = keyInfo
+break
+end
+end
+if not foundKey then
+remainingLabel:SetText("密钥期限: 永久")
+return
+end
+local remainingText = formatRemaining(foundKey.expires_at)
+remainingLabel:SetText("密钥期限: " .. remainingText)
+end)
+end
+task.spawn(function()
+while true do
+updateKeyInfo()
+task.wait(2)
+end
+end)
+
+Info:AddLabel("[<font color=\"rgb(73,230,133)\">千change</font>] 有?")
+Info:AddDivider()
+Info:AddLabel({
+Text = "<font color=\"rgb(135,206,235)\">加入我们的群</font>",
+Size = 23
+})
+Info:AddLabel("主群：<font color=\"rgb(173,216,230)\">1070767561</font>")
+Info:AddLabel("②群：<font color=\"rgb(173,216,230)\">1075296984</font>")
+Info:AddLabel("③群：<font color=\"rgb(173,216,230)\">1077974715</font>")
+Info:AddLabel("④群：<font color=\"rgb(173,216,230)\">1079930056</font>")
+
+
+Movement:AddToggle('SpeedBoost',{
+     Text = "移动速度",
+     Default = false
 })
 
 Speed = 15
 Movement:AddSlider("SpeedBoostSlider", {
-    Text = "移动速度值",
-    Default = 15,
-    Min = 15,
-    Max = 21,
-    Rounding = 1,
+        Text = "移动速度：",
+        Default = 15,
+        Min = 15,
+        Max = 21,
+        Rounding = 1,
 Callback = function(Value)
 Speed = Value
-if Toggles.SpeedBoost.Value and Character and Character.Humanoid then
-Character.Humanoid.WalkSpeed = Speed
-end
 end,      
 })
 
 LadderSpeedSlider = Movement:AddSlider("LadderSpeedBoost", {
-    Text = "爬梯子加速",
+    Text = "粒子加速",
     Default = 5,
     Min = 0,
     Max = 50,
@@ -340,7 +438,7 @@ end
 updateLadderSpeedSlider()
 
 Movement:AddToggle('EnableJump', {
-    Text = "启用跳跃",
+    Text = "自动跳跃",
     Default = false
 })
 Toggles.EnableJump:OnChanged(function(Value)
@@ -433,6 +531,18 @@ end
 end
 end))
 
+Movement:AddToggle('EnableSlide', {
+    Text = "自动滑铲",
+    Default = false
+})
+Toggles.EnableSlide:OnChanged(function(Value)
+if Character then
+Character:SetAttribute("CanSlide", Value)
+end
+end)
+if LocalPlayer.Character and Toggles.EnableSlide and Toggles.EnableSlide.Value then
+LocalPlayer.Character:SetAttribute("CanSlide", true)
+end
 
 Movement:AddToggle('Noacceleration', {
     Text = "无加速度",
@@ -441,7 +551,7 @@ Movement:AddToggle('Noacceleration', {
 Movement:AddDivider()
 
 Movement:AddToggle('InstantPrompt', {
-    Text = "快速互动",
+    Text = "?�互动",
     Default = false,
 Callback = function(Value)
 if Value then
@@ -663,8 +773,8 @@ end
     Mode = 'Toggle',
     Text = '飞行',
     NoUI = false,
-    Callback = function(Value) end,
-    ChangedCallback = function(New) end
+Callback = function(Value) end,
+ChangedCallback = function(New) end
 })
 FlySpeed = Movement:AddSlider("FlySpeed", {
     Text = "飞行速度",
@@ -729,6 +839,75 @@ end,
 })
 Automation:AddDivider()
 
+Automation:AddToggle('AutoCloset',{
+     Text = "自动躲藏",
+     Risky = true,
+     Default = false
+}):AddKeyPicker('AutoClosetKeybind', {
+    Default = 'Q',
+    SyncToggleState = true,
+    Mode = 'Toggle',
+    Text = '自动躲藏',
+    NoUI = false,
+Callback = function(Value) end,
+ChangedCallback = function(New) end
+})
+local EntitysTable = {
+    RushMoving = 85,
+    BackdoorRush = 90,
+    AmbushMoving = 144,
+    GlitchRush = 120,
+    GlitchAmbush = 155,
+    A60 = 130,
+    A120 = 75
+}
+function GetNearestCloset()
+local closest = nil
+local MaxDistance = math.huge
+local assets = workspace.CurrentRooms[LocalPlayer:GetAttribute("CurrentRoom")]
+if assets then
+for _, v in ipairs(assets:FindFirstChild("Assets", true):GetChildren()) do
+if v.Name == "Wardrobe" or v.Name == "Rooms_Locker" or v.Name == "Rooms_Locker_Fridge" 
+or v.Name == "Toolshed" or v.Name == "Locker_Large" or v.Name == "Backdoor_Wardrobe" 
+or v.Name == "Bed" or v.Name == "Double_Bed" then
+if v.PrimaryPart then
+local Distance = (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+if Distance < MaxDistance then
+closest = v
+MaxDistance = Distance
+end
+end
+end
+end
+end
+return closest
+end
+table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
+if Toggles.AutoCloset.Value then
+local Closet = GetNearestCloset()
+for _, v in ipairs(workspace:GetChildren()) do
+local range = EntitysTable[v.Name]
+if range and v.PrimaryPart then
+if (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude <= range then 
+if Closet then
+if not LocalPlayer.Character.PrimaryPart.Anchored then
+fireproximityprompt(Closet:WaitForChild("HidePrompt"))
+end
+end
+elseif (LocalPlayer.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude > range then 
+LocalPlayer.Character:SetAttribute("Hiding", false)
+if not v:GetAttribute("Destroying") then
+v:SetAttribute("Destroying", true)
+v.Destroying:Connect(function()
+LocalPlayer.Character:SetAttribute("Hiding", false)
+end)
+end
+end
+end
+end
+end
+end))
+
 Automation:AddToggle('AutoHeartbeatMiniGame', {
     Text = "自动心跳小游戏",
     Default = false
@@ -745,173 +924,105 @@ end
 return oldHeartbeatNamecall(self, ...)
 end))
 
-local PL = nil
-local UnlockDistance = 40
-Automation:AddToggle('AutoCodeFire', {
+Automation:AddToggle('AutoLibraryCode', {
     Text = "自动解挂锁",
-    Default = false,
-    Tooltip = "在有效范围内自动解锁挂锁",
-Callback = function(on)
-if on then
-if not game:GetService("ReplicatedStorage"):FindFirstChild("RemotesFolder") then
-Library:Notify("未找到远程事件文件夹", 3)
-Toggles.AutoCodeFire:SetValue(false)
-return
-end
-PL = game:GetService("ReplicatedStorage").RemotesFolder:FindFirstChild("PL")
-if not PL then
-Library:Notify("未找到挂锁远程事件", 3)
-Toggles.AutoCodeFire:SetValue(false)
-return
-end
-while game:GetService("ReplicatedStorage").GameData.LatestRoom.Value < 50 do
-task.wait(0.4)
-if not Toggles.AutoCodeFire.Value then return end
-end
-local seenPapers = {}
-local lastCodes = {}
-local lastFireTimes = {}
-local padPart = nil
-local function updatePad()
-local idx = game:GetService("ReplicatedStorage").GameData.LatestRoom.Value
-local roomRoot = workspace.CurrentRooms and workspace.CurrentRooms[idx]
-if roomRoot then
-local pad = roomRoot:FindFirstChild("Padlock", true)
-padPart = pad and (pad.PrimaryPart or pad:FindFirstChildWhichIsA("BasePart"))
-else
-padPart = nil
-end
-end
-local function parsePaper(paper, hintsContainer)
-local children = paper:WaitForChild("UI"):GetChildren()
-local map, order = {}, {}
-for i = 1, #children do
-local c = children[i]
-local idx = tonumber(c.Name)
-if idx then
-local key = c.ImageRectOffset.X .. "_" .. c.ImageRectOffset.Y
-map[key] = { idx, "" }
-order[idx] = key
-end
-end
-if hintsContainer then
-for _, ic in ipairs(hintsContainer:GetChildren()) do
-if ic.Name == "Icon" then
-local key = ic.ImageRectOffset.X .. "_" .. ic.ImageRectOffset.Y
-local entry = map[key]
-if entry then
-local lbl = ic:FindFirstChildWhichIsA("TextLabel")
-if lbl then 
-entry[2] = lbl.Text 
-end
-end
-end
-end
-end
-local parts = {}
-for i = 1, #order do
-parts[i] = map[order[i]][2]
-end
-return table.concat(parts)
-end
-local function handleCode(paper)
-local hints = LocalPlayer.PlayerGui:FindFirstChild("PermUI") and 
-LocalPlayer.PlayerGui.PermUI:FindFirstChild("Hints")
-local code = parsePaper(paper, hints)
-if lastCodes[paper] ~= code and code ~= "" then
-lastCodes[paper] = code
-if padPart and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-local dist = (LocalPlayer.Character.HumanoidRootPart.Position - padPart.Position).Magnitude
-if dist <= UnlockDistance then
-local now = tick()
-if not lastFireTimes[code] or now - lastFireTimes[code] > 1 then
-local ok = pcall(function() 
-if PL then 
-PL:FireServer(code) 
-end
-end)
-if ok then 
-lastFireTimes[code] = now 
-end
-end
-end
-end
-end
-end
-local function addPaper(paper)
-if seenPapers[paper] then return end
-seenPapers[paper] = true
-local descAddedConn = paper.DescendantAdded:Connect(function()
-handleCode(paper)
-end)
-local descRemovingConn = paper.DescendantRemoving:Connect(function()
-handleCode(paper)
-end)
-handleCode(paper)
-table.insert(Connections, descAddedConn)
-table.insert(Connections, descRemovingConn)
-end
-local function removePaper(paper)
-seenPapers[paper] = nil
-lastCodes[paper] = nil
-end
-updatePad()
-local roomConn = game:GetService("ReplicatedStorage").GameData.LatestRoom:GetPropertyChangedSignal("Value"):Connect(updatePad)
-table.insert(Connections, roomConn)
-local function scanContainer(container)
-for _, obj in ipairs(container:GetChildren()) do
-if obj.Name == "LibraryHintPaper" or obj.Name == "LibraryHintPaperHard" then
-addPaper(obj)
-end
-end
-end
-scanContainer(LocalPlayer.Character)
-scanContainer(LocalPlayer.Backpack)
-local backpackAddedConn = LocalPlayer.Backpack.ChildAdded:Connect(function(obj)
-if obj.Name == "LibraryHintPaper" or obj.Name == "LibraryHintPaperHard" then
-addPaper(obj)
-end
-end)
-local backpackRemovedConn = LocalPlayer.Backpack.ChildRemoved:Connect(function(obj)
-removePaper(obj)
-end)
-table.insert(Connections, backpackAddedConn)
-table.insert(Connections, backpackRemovedConn)
-local characterAddedConn = LocalPlayer.CharacterAdded:Connect(function(char)
-task.wait(1)
-scanContainer(char)
-end)
-table.insert(Connections, characterAddedConn)
-else
-end
-end
+    Default = false
 })
+
+Automation:AddToggle('BruteForceLibraryCose', {
+    Text = "暴力破解挂锁",
+    Default = false
+})
+
 Automation:AddSlider('UnlockPadLockDistance', {
     Text = '解挂锁距离',
-    Min = 40, 
-    Max = 100, 
-    Default = 40,
+    Min = 40, Max = 100, Default = 40,
     Rounding = 1,
 Callback = function(v)
-UnlockDistance = v
 end
 })
 
-local Breaker = nil
+local function GetLibraryPattern()
+local Paper = LocalPlayer.Character:FindFirstChild("LibraryHintPaper") 
+or LocalPlayer.Backpack:FindFirstChild("LibraryHintPaper") 
+or LocalPlayer.Character:FindFirstChild("LibraryHintPaperHard") 
+or LocalPlayer.Backpack:FindFirstChild("LibraryHintPaperHard")
+if not Paper then return "_____" end
+local Slots = {"_", "_", "_", "_", "_"}
+local Hints = LocalPlayer.PlayerGui.PermUI.Hints:GetChildren()
+for _, UI in ipairs(Paper.UI:GetChildren()) do
+if UI:IsA("ImageLabel") and tonumber(UI.Name) then
+local SlotIndex = tonumber(UI.Name)
+local IconX = UI.ImageRectOffset.X
+for _, Hint in ipairs(Hints) do
+if Hint.Name == "Icon" and Hint.ImageRectOffset.X == IconX then
+Slots[SlotIndex] = Hint.TextLabel.Text
+break
+end
+end
+end
+end
+return table.concat(Slots)
+end
+local function GenerateGuess(Pattern)
+local Guess = ""
+for i = 1, #Pattern do
+local Char = string.sub(Pattern, i, i)
+if Char == "_" then
+Guess = Guess .. math.random(0, 9)
+else
+Guess = Guess .. Char
+end
+end
+return Guess
+end
+local AutoLibraryTimer = 0
+local NotifyTimer = 0
+table.insert(Connections, RunService.Heartbeat:Connect(function(dt)
+if not alive then return end
+AutoLibraryTimer = AutoLibraryTimer + dt
+NotifyTimer = NotifyTimer + dt
+if AutoLibraryTimer > 0.1 then
+AutoLibraryTimer = 0
+if LatestRoom.Value == 50 then
+local Padlock = Workspace.CurrentRooms:FindFirstChild("Padlock", true)
+if Padlock then
+local Root = LocalPlayer.Character.HumanoidRootPart
+local Pivot = Padlock:GetPivot().Position
+if (Root.Position - Pivot).Magnitude < Options.UnlockPadLockDistance.Value then
+local Pattern = GetLibraryPattern()
+local IsComplete = not string.find(Pattern, "_")
+if Toggles.AutoLibraryCode.Value and IsComplete then
+RemoteFolder.PL:FireServer(Pattern)
+end
+if Toggles.BruteForceLibraryCose.Value and not IsComplete then
+local Guess = GenerateGuess(Pattern)
+RemoteFolder.PL:FireServer(Guess)
+end
+if Toggles.NotifyLibraryCode.Value and NotifyTimer > 2 then
+NotifyTimer = 0
+Library:Notify("挂锁密码: " .. Pattern, 1.5)
+end
+end
+end
+end
+end
+end))
 
 Automation:AddDropdown("BreakerBoxMode", {
     Values = {"合法", "漏洞"},
     Default = "合法",
-    Text = "断路器箱解法",
-Callback = function(Value)
-end
+    Text = "发电机最优解法",
+    Callback = function(Value) end
 })
 
+local Breaker = nil
 Automation:AddToggle('AutoBreakerBox', {
-    Text = "自动断路器箱",
+    Text = "自动发电机",
     Default = false,
-Callback = function(Value)
+    Callback = function(Value)
 if Value then
+if LatestRoom.Value == 100 then
 for _, v in ipairs(workspace.CurrentRooms:GetDescendants()) do
 if v.Name == "ElevatorBreaker" then
 Breaker = v
@@ -928,13 +1039,15 @@ end
 else
 for _, v in ipairs(Breaker:GetChildren()) do
 if v.Name == "BreakerSwitch" then
-if v:GetAttribute("ID") == tonumber(Breaker:WaitForChild("SurfaceGui").Frame.Code.Text) then
+local codeDisplay = Breaker:WaitForChild("SurfaceGui").Frame.Code.Text
+if v:GetAttribute("ID") == tonumber(codeDisplay) then
 if Breaker:WaitForChild("SurfaceGui").Frame.Code.Frame.BackgroundTransparency == 0 then
 v:SetAttribute("Enabled", true)
 if v:WaitForChild("Sound").Playing == false then
 v:WaitForChild("Sound", 1e1).Playing = true
 end
 v.Material = Enum.Material.Neon
+v:WaitForChild("Light", 1e1).Attachment.Spark:Emit(1)
 v:WaitForChild("PrismaticConstraint").TargetPosition = -0.2
 else
 v:SetAttribute("Enabled", false)
@@ -952,126 +1065,32 @@ end
 end
 end
 end
-})
-
-local autoGlitchEnabled = false
-local autoGlitchConnection = nil
-Automation:AddToggle('AutoGlitch', {
-    Text = "自动故障",
-    Default = false,
-Callback = function(Value)
-autoGlitchEnabled = Value
-if autoGlitchEnabled then
-autoGlitchConnection = RunService.Heartbeat:Connect(function()
-if autoGlitchEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-local character = LocalPlayer.Character
-local humanoidRootPart = character.HumanoidRootPart
-teleportPosition = humanoidRootPart.Position - Vector3.new(0, -10, 0)
-character:PivotTo(CFrame.new(teleportPosition))
-end
-end)
-else
-if autoGlitchConnection then
-autoGlitchConnection:Disconnect()
-autoGlitchConnection = nil
-end
-end
 end
 })
+table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
+if Toggles.AutoBreakerBox.Value then
+if v.Name == "ElevatorBreaker" then 
+Breaker = v
+end
+end
+end))
 
-if Floor.Value == "Mines" then
-autoAnchorRunning = false
-autoAnchorConnection = nil
-lastCheck = 0
-checkInterval = 0.5
-cachedAnchors = {}
-local function updateAnchorCache()
-cachedAnchors = {}
-room50 = workspace.CurrentRooms:FindFirstChild("50")
-if not room50 then 
-for roomName, room in pairs(workspace.CurrentRooms:GetChildren()) do
-if tonumber(roomName) and tonumber(roomName) >= 50 then
-room50 = room
-break
-end
-end
-end
-if room50 then
-for _, anchor in ipairs(room50:GetDescendants()) do
-if anchor.Name == "MinesAnchor" then
-table.insert(cachedAnchors, anchor)
-end
-end
-end
-end
-local function solveAnchor()
-if not autoAnchorRunning then return end
-playerGui = LocalPlayer:WaitForChild("PlayerGui")
-mainUI = playerGui:WaitForChild("MainUI")
-AnchorHintFrame = mainUI:FindFirstChild("AnchorHintFrame")
-if not AnchorHintFrame then return end
-anchorSignText = AnchorHintFrame:FindFirstChild("AnchorCode")
-currentCode = AnchorHintFrame:FindFirstChild("Code")
-if not anchorSignText or not currentCode then return end
-signText = anchorSignText.Text
-codeText = currentCode.Text
-if signText == "" or codeText == "" then return end
-playerPosition = LocalPlayer.Character and 
-LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
-LocalPlayer.Character.HumanoidRootPart.Position
-if not playerPosition then return end
-for _, anchor in ipairs(cachedAnchors) do
-if not autoAnchorRunning then break end
-sign = anchor:FindFirstChild("Sign")
-if sign then
-textLabel = sign:FindFirstChild("TextLabel")
-if textLabel and textLabel.Text == signText then
-anchorPosition = anchor.PrimaryPart and anchor.PrimaryPart.Position or
-(anchor:FindFirstChildWhichIsA("BasePart") and anchor:FindFirstChildWhichIsA("BasePart").Position)
-if anchorPosition then
-distance = (playerPosition - anchorPosition).Magnitude
-if distance < 12 then
-anchorRemote = anchor:FindFirstChild("AnchorRemote")
-if anchorRemote then
-pcall(function()
-anchorRemote:InvokeServer(codeText)
-end)
-end
-break
-end
-end
-end
-end
-end
-end
-Automation:AddToggle('AutoAnchorSolver', {
-    Text = "自动密码机",
-    Default = false,
+if ReplicatedStorage:FindFirstChild("RemotesFolder") then
+Automation:AddToggle('AutoGlitch',{
+Text = "自动故障",
+Default = false,
 Callback = function(Value)
 if Value then
-autoAnchorRunning = true
-updateAnchorCache()
-autoAnchorConnection = game:GetService("RunService").Heartbeat:Connect(function()
-if not autoAnchorRunning then return end
-now = tick()
-if now - lastCheck >= checkInterval then
-lastCheck = now
-solveAnchor()
-end
-end)
+LocalPlayer.Character.HumanoidRootPart.Position = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 20, 0)
 else
-autoAnchorRunning = false
-if autoAnchorConnection then
-autoAnchorConnection:Disconnect()
-autoAnchorConnection = nil
-end
+LocalPlayer.Character.HumanoidRootPart.Position = LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 20, 0)
 end
 end
 })
 end
 
 ReachBox:AddToggle('DoorReach',{
-     Text = "延长开门",
+     Text = "延长判定",
      Default = false
 })
 
@@ -1155,7 +1174,7 @@ end
 })
 
 MiscBox:AddButton({
-     Text = "再玩一次",
+     Text = "再玩家",
 DoubleClick = true,
      Func = function()
 RemoteFolder.PlayAgain:FireServer()
@@ -1268,7 +1287,7 @@ end
 })
 
 Anti:AddToggle('AntiHear',{
-     Text = "防飞哥听力",
+     Text = "防盲哥听觉",
      Default = false
 })
 Toggles.AntiHear:OnChanged(function(Value)
@@ -1277,8 +1296,9 @@ RemoteFolder.Crouch:FireServer(false)
 end
 end)
 
+if ReplicatedStorage:FindFirstChild("RemotesFolder") then
 Bypass:AddDropdown("SpeedBypassMethod", {
-    Values = {"质量切换", "网络休眠"},
+    Values = {"质量切换", "网络休眠","暴力绕过"},
     Default = 1,
     Multi = false,
     Text = "速度绕过模式",
@@ -1288,6 +1308,9 @@ if Value == "质量切换" then
 Options.SpeedBoostSlider:SetMax(100)
 Options.FlySpeed:SetMax(100)
 elseif Value == "网络休眠" then
+Options.SpeedBoostSlider:SetMax(100)
+Options.FlySpeed:SetMax(100)
+elseif Options.SpeedBypassMethod.Value == "暴力绕过" then
 Options.SpeedBoostSlider:SetMax(150)
 Options.FlySpeed:SetMax(150)
 end
@@ -1296,30 +1319,31 @@ end,
 })
 SpeedBypassInterval = 0.216
 Bypass:AddToggle('SpeedBypass',{
-     Text = "速度绕过",
-     Default = false,
+    Text = "速度绕过",
+    Default = false,
 Callback = function(Value)
 if Value then
 if Options.SpeedBypassMethod.Value == "网络休眠" and not sethiddenproperty then
-Library:Notify("网络休眠模式无法使用，因为你的执行器不支持Sethiddenproperty", 5)
+Library:Notify("网络休眠模式无法使用，因为你的执行器不支持 Sethiddenproperty", 5)
 Toggles.SpeedBypass:SetValue(false)
 return
 end
 if Options.SpeedBypassMethod.Value == "质量切换" then
 Options.SpeedBoostSlider:SetMax(100)
 elseif Options.SpeedBypassMethod.Value == "网络休眠" then
+Options.SpeedBoostSlider:SetMax(100)
+elseif Options.SpeedBypassMethod.Value == "暴力绕过" then
 Options.SpeedBoostSlider:SetMax(150)
 end
 Options.SpeedBoostSlider:SetValue(Value and Options.SpeedBoostSlider.Value or 21)
-Options.FlySpeed:SetMax(Value and 100 or 21)
 Options.FlySpeed:SetValue(Value and Options.FlySpeed.Value or 21)
 task.spawn(function()
 while Toggles.SpeedBypass.Value do
 task.wait(SpeedBypassInterval)
 if alive then
 if Options.SpeedBypassMethod.Value == "质量切换" then
-CollisionClon = LocalPlayer.Character:WaitForChild("_CollisionPart")
-CollisionClon2 = LocalPlayer.Character:WaitForChild("_CollisionPart2")
+local CollisionClon = LocalPlayer.Character:WaitForChild("_CollisionPart")
+local CollisionClon2 = LocalPlayer.Character:WaitForChild("_CollisionPart2")
 if Character.CollisionPart.Anchored or nothitted or (Toggles.AnticheatManipulation and Toggles.AnticheatManipulation.Value) then
 CollisionClon.Massless = true
 CollisionClon2.Massless = true
@@ -1340,11 +1364,43 @@ Character:FindFirstChild("_CollisionPart").Massless = true
 Character:FindFirstChild("_CollisionPart2").Massless = true
 end
 end)
+task.spawn(function()
+while Toggles.SpeedBypass.Value do
+if Options.SpeedBypassMethod.Value == "暴力绕过" then
+local char = LocalPlayer.Character
+if char then
+local col1 = char:FindFirstChild("_CollisionPart")
+local col2 = char:FindFirstChild("_CollisionPart2")
+if col1 then col1.Massless = true end
+if col2 then col2.Massless = true end
+if RemoteFolder and RemoteFolder:FindFirstChild("Crouch") then
+RemoteFolder.Crouch:FireServer(true, true)
+end
+end
+task.wait()
+else
+task.wait()
+end
+end
+local char = LocalPlayer.Character
+if char then
+local col1 = char:FindFirstChild("_CollisionPart")
+local col2 = char:FindFirstChild("_CollisionPart2")
+if col1 then col1.Massless = false end
+if col2 then col2.Massless = false end
+end
+end)
 else
 Options.SpeedBoostSlider:SetMax(21)
 Options.SpeedBoostSlider:SetValue(21)
 Options.FlySpeed:SetMax(21)
 Options.FlySpeed:SetValue(21)
+if alive and Character then
+local col1 = Character:FindFirstChild("_CollisionPart")
+local col2 = Character:FindFirstChild("_CollisionPart2")
+if col1 then col1.Massless = false end
+if col2 then col2.Massless = false end
+end
 end
 end,
 })
@@ -1408,45 +1464,35 @@ end,
 })
 Bypass:AddDivider()
 
-local GodModeCameraHandler = {enabled = false}
-local function GodModeCameraStep()
-if not GodModeCameraHandler.enabled then return end
-local cam = workspace.CurrentCamera
-local char = LocalPlayer.Character
-if not cam or not char or not char:FindFirstChild("HumanoidRootPart") then return end
-local currentCF = cam.CFrame
-local newPosition = Vector3.new(
-currentCF.Position.X,
-currentCF.Position.Y + 2.45,
-currentCF.Position.Z
-)
-cam.CFrame = CFrame.new(newPosition, currentCF.Position + currentCF.LookVector * 10)
-end
-pcall(function() RunService:UnbindFromRenderStep("GOD_MODE_CAMERA_SYS") end)
-RunService:BindToRenderStep("GOD_MODE_CAMERA_SYS", Enum.RenderPriority.Camera.Value+2, GodModeCameraStep)
-workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
-if GodModeCameraHandler.enabled then
-GodModeCameraHandler.enabled = false
-task.wait(0.1)
-GodModeCameraHandler.enabled = true
-end
-end)
 Bypass:AddToggle('GodMode',{
     Text = "位置欺骗",
     Default = false,
 Callback = function(Value)
+local char = LocalPlayer.Character
+if not char then return end
 if Value then
 if not Toggles.AntiHear.Value then
 Toggles.AntiHear:SetValue(true)
 end
-Character.Collision.Size = Vector3.new(1, 0.001, 5)
-Character.Humanoid.HipHeight = 0.0001
-GodModeCameraHandler.enabled = true
+char.Collision.Size = Vector3.new(1, 3, 5)
+char.Humanoid.HipHeight = 0.0001
+local lowerTorso = char:FindFirstChild("LowerTorso")
+if lowerTorso then
+local rootJoint = lowerTorso:FindFirstChild("Root")
+if rootJoint and rootJoint:IsA("Motor6D") then
+rootJoint.C1 = CFrame.new(0, -2.5, 0)
+end
+end
 else
-LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
-Character.Collision.Size = Vector3.new(5.5, 3, 5)
-Character.Humanoid.HipHeight = 2.4
-GodModeCameraHandler.enabled = false
+local lowerTorso = char:FindFirstChild("LowerTorso")
+if lowerTorso then
+local rootJoint = lowerTorso:FindFirstChild("Root")
+if rootJoint and rootJoint:IsA("Motor6D") then
+rootJoint.C1 = CFrame.new(0, -0.24, 0)
+end
+end
+char.Collision.Size = Vector3.new(5.5, 3, 5)
+char.Humanoid.HipHeight = 2.4
 end
 end
 }):AddKeyPicker('GodmodeKeybind', {
@@ -1455,13 +1501,11 @@ end
     Mode = 'Toggle',
     Text = '位置欺骗',
     NoUI = false,
-Callback = function(Value)
-end,
-ChangedCallback = function(New)
-end
+    Callback = function(Value) end,
+    ChangedCallback = function(New) end
 })
 Bypass:AddDropdown("GMDropdown", {
-    Values = { "自动", "切换" },
+    Values = { "��", "切换" },
     Default = 2,
     Multi = false,
     Text = "位置欺骗模式",
@@ -1475,8 +1519,8 @@ AnticheatManipulationOrigin = nil
 AnticheatManipulationEnabled = false
 OriginalNoclipState = false
 Bypass:AddDropdown("AnticheatManipulationMode", {
-    Values = {"瞬移", "坐标", "移动"},
-    Default = "瞬移",
+    Values = {"��", "坐标", "移动"},
+    Default = "��",
     Multi = false,
     Text = "操纵模式",
 Callback = function(Value)
@@ -1488,7 +1532,7 @@ end
 end,
 })
 Bypass:AddToggle('AnticheatManipulation',{
-     Text = "操纵器",
+     Text = "操纵杆",
      Default = false,
 Callback = function(Value)
 if Value then
@@ -1505,7 +1549,7 @@ if alive then
 local character = LocalPlayer.Character
 local humanoidRootPart = character.HumanoidRootPart
 local lookVector = humanoidRootPart.CFrame.LookVector
-if Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "瞬移" then
+if Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "��" then
 if not AnticheatManipulationOrigin then
 AnticheatManipulationOrigin = humanoidRootPart.Position
 end
@@ -1529,7 +1573,7 @@ else
 task.wait()
 end
 end
-if alive and AnticheatManipulationOrigin and Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "瞬移" then
+if alive and AnticheatManipulationOrigin and Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "��" then
 character:PivotTo(CFrame.new(AnticheatManipulationOrigin))
 end
 end)
@@ -1542,7 +1586,7 @@ end
 if Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "移动" and Toggles.Noclip then
 Toggles.Noclip:SetValue(OriginalNoclipState)
 end
-if alive and AnticheatManipulationOrigin and Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "瞬移" then
+if alive and AnticheatManipulationOrigin and Options.AnticheatManipulationMode and Options.AnticheatManipulationMode.Value == "��" then
 LocalPlayer.Character:PivotTo(CFrame.new(AnticheatManipulationOrigin))
 end
 AnticheatManipulationOrigin = nil
@@ -1552,7 +1596,7 @@ end
     Default = 'H',
     SyncToggleState = true,
     Mode = 'Toggle',
-    Text = '操纵器',
+    Text = '操纵杆',
     NoUI = false,
 Callback = function(Value)
 end,
@@ -1560,9 +1604,10 @@ ChangedCallback = function(New)
 end
 })
 Bypass:AddDivider()
+end
 
 Bypass:AddToggle('UseToolsAnyWhere',{
-     Text = "随处使用道具",
+     Text = "随时使用道具",
      Default = false,
 Callback = function(Value)
 if Value then
@@ -1573,6 +1618,7 @@ end
 end
 })
 
+if ReplicatedStorage:FindFirstChild("RemotesFolder") then
 local Disable3 = false
 local Prompt = Instance.new("ProximityPrompt", workspace)
 Prompt.Name = "TestPrompt"
@@ -1600,12 +1646,31 @@ Cellar = true
 local ShearsNames = { 
 SkullPrompt = true 
 }
+local function isLockpickRelatedPrompt(v, validParents, validNames)
+if not v or not v.Parent then return false end
+if validParents[v.Parent.Name] or validNames[v.Name] then
+return true
+end
+local parent = v.Parent
+if parent and parent.Name == "Door" then
+local grandParent = parent.Parent
+if grandParent and validParents[grandParent.Name] then
+local lockerTypes = {
+["Locker_Small_Locked"] = true
+}
+if lockerTypes[grandParent.Name] then
+return true
+end
+end
+end
+return false
+end
 local InfStore = {}
 local InfSStore = {}
 local function scanPrompts(validParents, validNames)
 local t = {}
 for _, v in ipairs(workspace.CurrentRooms:GetDescendants()) do
-if v:IsA("ProximityPrompt") and (validParents[v.Parent.Name] or validNames[v.Name]) then
+if v:IsA("ProximityPrompt") and isLockpickRelatedPrompt(v, validParents, validNames) then
 table.insert(t, v)
 end
 end
@@ -1666,7 +1731,7 @@ local function setupRealtimeDetection()
 local descAddedConnection = workspace.DescendantAdded:Connect(function(v)
 task.wait(0.1)
 if v:IsA("ProximityPrompt") then
-if LockpickParents[v.Parent.Name] or LockpickNames[v.Name] then
+if isLockpickRelatedPrompt(v, LockpickParents, LockpickNames) then
 if Toggles.InfiniteItems and Toggles.InfiniteItems.Value then
 table.insert(InfStore, v)
 local hasTool = LocalPlayer.Character and 
@@ -1677,7 +1742,7 @@ addFake(v, "Lockpick")
 end
 end
 end
-if ShearsParents[v.Parent.Name] or ShearsNames[v.Name] then
+if isLockpickRelatedPrompt(v, ShearsParents, ShearsNames) then
 if Toggles.InfiniteSItems and Toggles.InfiniteSItems.Value then
 table.insert(InfSStore, v)
 local hasTool = LocalPlayer.Character and 
@@ -1730,7 +1795,7 @@ end
 })
 
 Bypass:AddToggle('InfiniteSItems', {
-    Text = "无限剪刀",
+    Text = "无限复活",
     Default = false,
 Callback = function(Value)
 if Value then
@@ -1926,7 +1991,7 @@ end)
 end)
 end
 Bypass:AddButton({
-    Text = "假死",
+    Text = "假身",
 DoubleClick = true,
 Risky = true,
 Func = function()
@@ -1942,9 +2007,9 @@ task.wait(1)
 game:GetService("CoreGui"):FindFirstChild("RobloxGui").Backpack.Visible = true
 game:GetService("Players").LocalPlayer:SetAttribute("Alive",true)
 game:GetService("Players").LocalPlayer:SetAttribute("FakeDeath",true)
-Library:Notify("拾取创口贴后恢复所有互动", 5)
+Library:Notify("拾取创口贴后恢有互动", 5)
 else
-Library:Notify("进入下一个房间后假死才能正常工作", 5)
+Library:Notify("进入下一个房间后假身才能正常工作", 5)
 end
 end
 })
@@ -1959,6 +2024,84 @@ Troll:AddToggle("Spamtoolz", {
     Text = "滥用他人工具", 
     NoUI = false, 
 })
+end
+
+local NonsenseLines = {
+"我这是空间意识补全",
+"你以为在打排位，其实在陪我调试",
+"我走的不是路，是寻路算法的空隙",
+"这个不是飞，是引力被我关了",
+"我只是让服务器更相信我",
+"我的移动是服务器认可的",
+"我和服务器了双边确认协议",
+"你操作的?色，我操作的是设定本身",
+"我这是相位回滚，不是瞬移",
+"我掉线不是掉线，是进入高维观察者模式",
+"我残血是因为我开了省电模式，满血要充会员",
+"你追不上我，因为你还在用欧氏几何",
+"我这是物理引擎重写",
+"你看到的不是我，��务器给你发的占位符",
+"我这是本地不渲染移动",
+"我只?判定走我的回调函数",
+"我只?时间戳替我移动",
+"我这是显存级透视",
+"你这是渲染，我这是魔法",
+"不是我在瞬移，是服务器的tick被我卡出了时空断层",
+"你那����我这��子跃",
+"其实我没动，是世界在动",
+"我这不是加速，是我把你时间切片偷走了",
+"我连你的显卡都入侵了，你的帧率是我赏的",
+"我这不是穿墙，是CollisionGroup覆盖显卡缓存了",
+"我没飞天，是重力脚本修改Local了",
+"我关了FE的远程传送",
+"你看见我的残影是上一个Tween还在跑",
+"我不拉回��作弊觉得我合理",
+"我这是无限缓动式量子逼近",
+"速度��我献��AL14的浮点",
+"假身不够我再献祭一个队友",
+}
+local SpamNonsenseActive = false
+local SpamNonsenseThread = nil
+local function startNonsenseSpam()
+if SpamNonsenseThread then return end
+SpamNonsenseActive = true
+SpamNonsenseThread = task.spawn(function()
+local textChatService = game:GetService("TextChatService")
+local channel = textChatService and textChatService.TextChannels:FindFirstChild("RBXGeneral")
+if not channel then
+Library:Notify("无法获取聊天频道", 5)
+return
+end
+while SpamNonsenseActive do
+task.wait(2)
+if not SpamNonsenseActive then break end
+local line = NonsenseLines[math.random(1, #NonsenseLines)]
+if line and line ~= "" then
+pcall(function()
+channel:SendAsync(line)
+end)
+end
+end
+end)
+end
+local function stopNonsenseSpam()
+SpamNonsenseActive = false
+if SpamNonsenseThread then
+task.cancel(SpamNonsenseThread)
+SpamNonsenseThread = nil
+end
+end
+Troll:AddToggle('SpamNonsense', {
+    Text = "刷屏",
+    Default = false,
+Callback = function(Value)
+if Value then
+startNonsenseSpam()
+else
+stopNonsenseSpam()
+end
+end
+})
 
 Troll:AddToggle("StunPlayer", {
     Text = "眩晕",
@@ -1970,9 +2113,75 @@ end
 end
 })
 
+OrbitTime = 0
+OrbitSpeed = 2
+OrbitRadius = 4
+Troll:AddToggle('TeleportDrops', {
+    Text = "掉落物传送",
+    Default = false,
+Callback = function(Value)
+end
+})
+
+Troll:AddSlider("OrbitSpeedSlider", {
+    Text = "移动速度",
+    Default = 2,
+    Min = 0,
+    Max = 10,
+    Rounding = 1,
+    Compact = true,
+Callback = function(Value)
+OrbitSpeed = Value
+end
+})
+
+Troll:AddSlider("OrbitRadiusSlider", {
+    Text = "攻击范围",
+    Default = 4,
+    Min = 0,
+    Max = 20,
+    Rounding = 1,
+    Compact = true,
+Callback = function(Value)
+OrbitRadius = Value
+end
+})
+OrbitSpeed = Options.OrbitSpeedSlider.Value
+OrbitRadius = Options.OrbitRadiusSlider.Value
+
+table.insert(Connections,RunService.RenderStepped:Connect(function(dt)
+if Toggles.TeleportDrops and Toggles.TeleportDrops.Value then
+OrbitTime = OrbitTime + dt * OrbitSpeed
+local drops = workspace:FindFirstChild("Drops")
+if drops and Character and Character:FindFirstChild("HumanoidRootPart") then
+local rootPos = Character.HumanoidRootPart.Position
+local radius = OrbitRadius
+local height = 1.5
+local validDrops = {}
+for _, dropModel in ipairs(drops:GetChildren()) do
+local pickup = dropModel:FindFirstChild("ItemDropPickup")
+if pickup and pickup:IsA("BasePart") then
+table.insert(validDrops, pickup)
+end
+end
+local count = #validDrops
+if count > 0 then
+local angleStep = (2 * math.pi) / count
+for i, pickup in ipairs(validDrops) do
+local angle = (i - 1) * angleStep + OrbitTime
+local offset = Vector3.new(math.cos(angle) * radius, height, math.sin(angle) * radius)
+pickup.CFrame = CFrame.new(rootPos + offset)
+end
+end
+end
+end
+end))
+
 local ESPGlobalSettings = {
 ESPType = "Highlight",
+TracerPosition = "Bottom",
 TextSize = 16,
+TracerThickness = 1,
 FillTransparency = 0.7,
 OutlineTransparency = 0.4,
 }
@@ -1995,7 +2204,7 @@ end
 })
 
 SettingsESP:AddToggle('GlobalTracerEnabled', {
-    Text = "箭头",
+    Text = "��",
     Default = false,
 Callback = function(Value)
 ESPLibrary.GlobalConfig.Arrows = Value
@@ -2010,6 +2219,31 @@ ESPLibrary.GlobalConfig.Rainbow = Value
 end
 })
 
+SettingsESP:AddToggle('ShowDistance',{
+     Text = "显示距离",
+     Default = true,
+Callback = function(Value)
+ESPLibrary.GlobalConfig.Distance = Value
+end
+})
+
+SettingsESP:AddToggle('ShowText',{
+     Text = "显示文本",
+     Default = true,
+Callback = function(Value)
+ESPLibrary.GlobalConfig.Billboards = Value
+end
+})
+
+SettingsESP:AddDropdown("TracerPosition", {
+    Values = {"Top", "Bottom", "Center", "Mouse"},
+    Default = "Bottom",
+    Text = "追踪线位置",
+Callback = function(Value)
+ESPGlobalSettings.TracerPosition = Value
+end,
+})
+
 SettingsESP:AddSlider('GlobalTextSize', {
     Text = "文本大小",
     Default = 16,
@@ -2022,8 +2256,20 @@ ESPGlobalSettings.TextSize = Value
 end
 })
 
+SettingsESP:AddSlider("TracerThicknessSlider", {
+    Text = "追踪线厚度",
+    Default = 1,
+    Min = 0.1,
+    Max = 5.0,
+    Rounding = 1,
+    Compact = true,
+Callback = function(Value)
+ESPGlobalSettings.TracerThickness = Value
+end
+})
+
 SettingsESP:AddSlider('GlobalOutlineTransparency', {
-    Text = "轮廓透明度",
+    Text = "设置透明度",
     Default = 0.4,
     Min = 0,
     Max = 1,
@@ -2035,7 +2281,7 @@ end
 })
 
 SettingsESP:AddSlider('GlobalFillTransparency', {
-    Text = "填充透明度",
+    Text = "设置透明度",
     Default = 0.7,
     Min = 0,
     Max = 1,
@@ -2048,371 +2294,263 @@ end
 
 local DoorESPObjects = {}
 local DoorColor = Color3.new(0, 1, 1)
-local function shouldShowESP(roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
-end
-local function AddDoorESP(door, roomNumber)
-if not door or not door.Parent then return end
-local model = door
-if door:IsA("BasePart") and door.Parent and door.Parent:IsA("Model") then
-model = door.Parent
-end
-if door.Name == "Door" and door.Parent and door.Parent.Name == "Door" then
-model = door
-end
-if DoorESPObjects[model] then
-DoorESPObjects[model]:Hide()
-end
-local displayText = "门 " .. (door.Parent:GetAttribute("RoomID") or roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-local isLocked = false
-local isOpen = not door.Anchored
-if roomNumber == currentRoom then
-if door.Parent:FindFirstChild("Lock") then
-isLocked = true
-end
-elseif roomNumber == currentRoom + 1 then
-local keyFound = false
+local doorUpdateLoop
+local function getDoorText(doorPart, roomNumber)
+local status = ""
+local isOpen = doorPart.Parent:GetAttribute("Opened") == true
+if isOpen then
+status = "[已打开] "
+else
+if doorPart.Parent:FindFirstChild("Lock") then
+status = "[锁定] "
+elseif LocalPlayer:GetAttribute("CurrentRoom") == roomNumber - 1 then
 local room = workspace.CurrentRooms:FindFirstChild(tostring(roomNumber))
 if room then
 for _, obj in ipairs(room:GetDescendants()) do
 if obj.Name == "KeyObtain" and not obj:GetAttribute("Used") then
-keyFound = true
+status = "[锁定] "
 break
 end
 end
 end
-if keyFound then
-isLocked = true
 end
 end
-if isOpen then
-displayText = "[已打开] " .. displayText
-else
-if isLocked then
-displayText = "[锁定] " .. displayText
+return status .. " " .. (doorPart.Parent:GetAttribute("RoomID") or roomNumber)
 end
-end
-local espObject = ESPLibrary:Add({
-Name = displayText,
-Model = model,
+local function addOrUpdateDoorESP(doorPart, roomNumber)
+local esp = DoorESPObjects[doorPart]
+if not esp then
+esp = ESPLibrary:Add({
+Name = getDoorText(doorPart, roomNumber),
+Model = doorPart,
 Color = DoorColor,
-MaxDistance = 1000,
+MaxDistance = 5000,
 TextSize = ESPGlobalSettings.TextSize,
 ESPType = ESPGlobalSettings.ESPType,
 FillColor = DoorColor,
 OutlineColor = DoorColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
+Tracer = {
 Enabled = true,
 Color = DoorColor,
-From = "Bottom"
+Thickness = ESPGlobalSettings.TracerThickness,
+From = ESPGlobalSettings.TracerPosition,
 },
 Arrow = {
 Enabled = true,
-Color = DoorColor
-}
+Color = DoorColor,
+},
 })
-DoorESPObjects[model] = espObject
-espObject:Show()
+DoorESPObjects[doorPart] = esp
 end
-local function RemoveDoorESP(door)
-local model = door
-if door.Name == "Door" and door.Parent and door.Parent.Name == "Door" then
-model = door
-elseif door:IsA("BasePart") and door.Parent and door.Parent:IsA("Model") then
-model = door.Parent
-end
-if DoorESPObjects[model] then
-DoorESPObjects[model]:Destroy()
-DoorESPObjects[model] = nil
+local newName = getDoorText(doorPart, roomNumber)
+if esp.CurrentSettings and esp.CurrentSettings.Name ~= newName then
+esp.CurrentSettings.Name = newName
+if esp.GUI and esp.GUI.Txt then
+esp.GUI.Txt.Text = newName
 end
 end
-local function UpdateDoorESP(door, roomNumber)
-if not DoorESPObjects[door] then return end
-local displayText = "门 " .. (door.Parent:GetAttribute("RoomID") or roomNumber)
+end
+local function startDoorESP()
+doorUpdateLoop = task.spawn(function()
+while Toggles.Door and Toggles.Door.Value do
 local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-local isLocked = false
-local isOpen = not door.Anchored
-if roomNumber == currentRoom then
-if door.Parent:FindFirstChild("Lock") then
-isLocked = true
+if currentRoom then
+local toRemove = {}
+for doorPart, esp in pairs(DoorESPObjects) do
+if not doorPart or not doorPart.Parent or not doorPart.Parent.Parent then
+table.insert(toRemove, doorPart)
+else
+local roomModel = doorPart.Parent.Parent
+local roomName = roomModel and roomModel.Name
+if roomName ~= tostring(currentRoom) and
+roomName ~= tostring(currentRoom + 1) then
+table.insert(toRemove, doorPart)
 end
-elseif roomNumber == currentRoom + 1 then
-local keyFound = false
+end
+end
+for _, dp in ipairs(toRemove) do
+pcall(function() DoorESPObjects[dp]:Destroy() end)
+DoorESPObjects[dp] = nil
+end
+for _, offset in ipairs({0, 1}) do
+local roomNumber = currentRoom + offset
 local room = workspace.CurrentRooms:FindFirstChild(tostring(roomNumber))
 if room then
-for _, obj in ipairs(room:GetDescendants()) do
-if obj.Name == "KeyObtain" and not obj:GetAttribute("Used") then
-keyFound = true
-break
+local doorModel = room:FindFirstChild("Door")
+if doorModel then
+local doorPart = doorModel:FindFirstChild("Door")
+if doorPart then
+addOrUpdateDoorESP(doorPart, roomNumber)
 end
 end
 end
-if keyFound then
-isLocked = true
 end
 end
-if isOpen then
-displayText = "[已打开] " .. displayText
-else
-if isLocked then
-displayText = "[锁定] " .. displayText
+task.wait()
 end
+stopDoorESP()
+end)
 end
-DoorESPObjects[door].CurrentSettings.Name = displayText
-if DoorESPObjects[door].GUI and DoorESPObjects[door].GUI.Txt then
-DoorESPObjects[door].GUI.Txt.Text = displayText
+local function stopDoorESP()
+if doorUpdateLoop then
+task.cancel(doorUpdateLoop)
+doorUpdateLoop = nil
 end
+for _, esp in pairs(DoorESPObjects) do
+pcall(esp.Destroy, esp)
+end
+DoorESPObjects = {}
 end
 ESP:AddToggle('Door', {
-Text = "门",
-Default = false,
+    Text = "",
+    Default = false,
 Callback = function(Value)
 if Value then
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowESP(roomNumber) then
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-local door = room.Door.Door
-AddDoorESP(door, roomNumber)
-end
-end
-end
+startDoorESP()
 else
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-RemoveDoorESP(room.Door.Door)
-end
-end
+stopDoorESP()
 end
 end
 }):AddColorPicker('DoorColor', {
     Default = DoorColor,
-    Title = '门颜色',
+    Title = '门',
     Transparency = 0,
 Callback = function(Value)
 DoorColor = Value
-for _, espObject in pairs(DoorESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
+if Toggles.Door.Value then
+stopDoorESP()
+startDoorESP()
 end
 end
 })
-table.insert(Connections, workspace.CurrentRooms.ChildAdded:Connect(function(room)
-if Toggles.Door and Toggles.Door.Value then
-task.wait(0.5)
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowESP(roomNumber) then
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-local door = room.Door.Door
-AddDoorESP(door, roomNumber)
-end
-end
-end
-end))
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.Door and Toggles.Door.Value then
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-RemoveDoorESP(room.Door.Door)
-end
-end
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if currentRoom then
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and (roomNumber == currentRoom or roomNumber == currentRoom + 1) then
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-local door = room.Door.Door
-AddDoorESP(door, roomNumber)
-end
-end
-end
-end
-end
-end))
-table.insert(Connections, RunService.RenderStepped:Connect(function()
-if Toggles.Door and Toggles.Door.Value then
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowESP(roomNumber) then
-if room:FindFirstChild("Door") and room.Door:FindFirstChild("Door") then
-local door = room.Door.Door
-if DoorESPObjects[door] then
-UpdateDoorESP(door, roomNumber)
-end
-end
-end
-end
-end
-if Toggles.AutoBreakerBox and Toggles.AutoBreakerBox.Value then
-if not Breaker or not Breaker.Parent then
-for _, v in ipairs(workspace.CurrentRooms:GetDescendants()) do
-if v.Name == "ElevatorBreaker" then
-Breaker = v
-end
-end
-end
-end
-end))
 
+local stopLadderESP
 if Floor.Value == "Mines" then
 local LadderColor = Color3.new(0, 0.5, 1)
 local LadderESPObjects = {}
-local function shouldShowLadderESP(roomNumber)
+local ladderRoomConn, ladderAddedConn, ladderRemovedConn, ladderFloorConn
+local function shouldShowLadder(roomNumber)
 local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
+return currentRoom and (roomNumber == currentRoom or roomNumber == currentRoom + 1)
 end
-local function AddLadderESP(ladder, text, color)
+local function AddLadderESP(ladder)
 if not ladder or not ladder.Parent or LadderESPObjects[ladder] then return end
-local espObject = ESPLibrary:Add({
-Name = text,
+local esp = ESPLibrary:Add({
+Name = "��",
 Model = ladder,
-Color = color,
+Color = LadderColor,
 MaxDistance = 1000,
 TextSize = ESPGlobalSettings.TextSize,
 ESPType = ESPGlobalSettings.ESPType,
-FillColor = color,
-OutlineColor = color,
+FillColor = LadderColor,
+OutlineColor = LadderColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = color,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = color
-}
+Tracer = { Enabled = true, Color = LadderColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = LadderColor }
 })
-LadderESPObjects[ladder] = espObject
-espObject:Show()
+LadderESPObjects[ladder] = esp
+esp:Show()
 end
 local function RemoveLadderESP(ladder)
-if LadderESPObjects[ladder] then
-LadderESPObjects[ladder]:Destroy()
+local esp = LadderESPObjects[ladder]
+if esp then
+pcall(esp.Destroy, esp)
 LadderESPObjects[ladder] = nil
 end
 end
-local function ScanAndAddLadders()
+local function getRoomNumber(obj)
+local anc = obj
+while anc and anc ~= workspace do
+if anc.Parent == workspace.CurrentRooms and tonumber(anc.Name) then
+return tonumber(anc.Name)
+end
+anc = anc.Parent
+end
+return nil
+end
+local function scanLadders()
 if Floor.Value ~= "Mines" then return end
 for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowLadderESP(roomNumber) then
+local roomNum = tonumber(room.Name)
+if roomNum and shouldShowLadder(roomNum) then
 for _, ladder in ipairs(room:GetDescendants()) do
 if ladder.Name == "Ladder" and ladder:IsA("Model") then
-AddLadderESP(ladder, "梯子", LadderColor)
+AddLadderESP(ladder)
 end
 end
 end
 end
 end
-local function ClearAllLadderESP()
-for model, espObject in pairs(LadderESPObjects) do
-if espObject then
-espObject:Destroy()
+local function startLadderESP()
+scanLadders()
+ladderRoomConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for ladder in pairs(LadderESPObjects) do
+RemoveLadderESP(ladder)
+end
+scanLadders()
+end)
+ladderAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(obj)
+if not Toggles.Ladder.Value then return end
+if obj.Name == "Ladder" and obj:IsA("Model") then
+local roomNum = getRoomNumber(obj)
+if roomNum and shouldShowLadder(roomNum) then
+AddLadderESP(obj)
 end
 end
-LadderESPObjects = {}
+end)
+ladderRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(obj)
+if LadderESPObjects[obj] then
+RemoveLadderESP(obj)
+end
+end)
+end
+function stopLadderESP()
+if ladderRoomConn then ladderRoomConn:Disconnect(); ladderRoomConn = nil end
+if ladderAddedConn then ladderAddedConn:Disconnect(); ladderAddedConn = nil end
+if ladderRemovedConn then ladderRemovedConn:Disconnect(); ladderRemovedConn = nil end
+if ladderFloorConn then ladderFloorConn:Disconnect(); ladderFloorConn = nil end
+for ladder in pairs(LadderESPObjects) do
+RemoveLadderESP(ladder)
+end
 end
 ESP:AddToggle('Ladder', {
-    Text = "梯子",
+    Text = "��",
     Default = false,
 Callback = function(Value)
 if Value then
-ScanAndAddLadders()
+startLadderESP()
 else
-ClearAllLadderESP()
+stopLadderESP()
 end
 end
 }):AddColorPicker('LadderColor', {
     Default = LadderColor,
-    Title = '梯子颜色',
+    Title = '��颜色',
     Transparency = 0,
 Callback = function(Value)
 LadderColor = Value
-if Toggles.Ladder and Toggles.Ladder.Value then
-for model, espObject in pairs(LadderESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
-end
+if Toggles.Ladder.Value then
+stopLadderESP()
+startLadderESP()
 end
 end
 })
-table.insert(Connections, Floor.Changed:Connect(function()
-if Toggles.Ladder and Toggles.Ladder.Value then
-ClearAllLadderESP()
-ScanAndAddLadders()
-else
-ClearAllLadderESP()
-Toggles.Ladder:SetValue(false)
-end
-end))
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.Ladder and Toggles.Ladder.Value then
-ClearAllLadderESP()
-ScanAndAddLadders()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.Ladder and Toggles.Ladder.Value then
-task.wait(0.1)
-if v.Name == "Ladder" and v:IsA("Model") then
-local parent = v.Parent
-while parent do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and shouldShowLadderESP(roomNumber) then
-AddLadderESP(v, "梯子", LadderColor)
-break
-end
-end
-parent = parent.Parent
-end
-end
-end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if LadderESPObjects[v] then
-RemoveLadderESP(v)
-end
-end))
 end
 
 local TaskESPObjects = {}
 local TaskColor = Color3.new(0, 1, 0)
+local roomChangeConn, itemAddedConn, itemRemovedConn
 local function AddTaskESP(item, text, color)
 if not item or not item.Parent then return end
 local model = item
-if item:IsA("BasePart") and item.Parent and item.Parent:IsA("Model") then
+if item:IsA("BasePart") and item.Parent:IsA("Model") then
 model = item.Parent
 end
-if TaskESPObjects[model] then
-TaskESPObjects[model]:Hide()
-end
-local espObject = ESPLibrary:Add({
+if TaskESPObjects[model] then return end
+local esp = ESPLibrary:Add({
 Name = text,
 Model = model,
 Color = color,
@@ -2423,27 +2561,98 @@ FillColor = color,
 OutlineColor = color,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = color,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = color
-}
+Tracer = { Enabled = true, Color = color, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = color }
 })
-TaskESPObjects[model] = espObject
-espObject:Show()
+TaskESPObjects[model] = esp
+esp:Show()
 end
-local function RemoveTaskESP(item)
-local model = item
-if item:IsA("BasePart") and item.Parent and item.Parent:IsA("Model") then
-model = item.Parent
-end
-if TaskESPObjects[model] then
-TaskESPObjects[model]:Destroy()
+local function RemoveTaskESP(model)
+local esp = TaskESPObjects[model]
+if esp then
+pcall(esp.Destroy, esp)
 TaskESPObjects[model] = nil
+end
+end
+local function getTaskItemNameAndText(item)
+local name = item.Name
+if name == "KeyObtain" and not item:GetAttribute("Used") then
+return "钥匙", item
+elseif name == "FuseObtain" and item.Parent and item.Parent.Name == "FuseHolder" then
+return "保险丝", item
+elseif name == "LiveHintBook" then
+return "", item
+elseif name == "LiveBreakerPolePickup" then
+return "��", item
+elseif name == "MinesAnchor" and item:FindFirstChild("Sign") and Floor.Value == "Mines" then
+return " " .. item.Sign.TextLabel.Text, item
+elseif name == "GeneratorMain" then
+return "发电机", item
+elseif name == "MinesGateButton" then
+return "门按钮", item
+elseif name == "WaterPump" and Floor.Value == "Mines" then
+return "水泵", item
+elseif name == "TimerLever" then
+return "计时器拉杆", item
+elseif name == "LeverForGate" then
+return "门拉杆", item
+elseif Floor.Value == "Garden" and name == "Lever" and item.Parent and item.Parent.Name == "VineGuillotine" then
+return "拉杆", item
+elseif Floor.Value == "Ripple" and name == "CringlePresent" then
+return "礼物盒", item
+end
+return nil, nil
+end
+local function scanCurrentRoom()
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if not room then return end
+for _, item in ipairs(room:GetDescendants()) do
+local text, model = getTaskItemNameAndText(item)
+if text then
+AddTaskESP(model, text, TaskColor)
+end
+end
+end
+local function startTaskESP()
+scanCurrentRoom()
+roomChangeConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for model in pairs(TaskESPObjects) do
+RemoveTaskESP(model)
+end
+scanCurrentRoom()
+end)
+itemAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(item)
+if not Toggles.TaskESP.Value then return end
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local anc = item:FindFirstAncestorOfClass("Model")
+while anc and anc ~= workspace.CurrentRooms do
+if anc.Name == tostring(currentRoom) then
+local text, model = getTaskItemNameAndText(item)
+if text then
+AddTaskESP(model, text, TaskColor)
+end
+break
+end
+anc = anc.Parent
+end
+end)
+itemRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(item)
+if TaskESPObjects[item] then
+RemoveTaskESP(item)
+elseif item:IsA("BasePart") and item.Parent and TaskESPObjects[item.Parent] then
+RemoveTaskESP(item.Parent)
+end
+end)
+end
+local function stopTaskESP()
+if roomChangeConn then roomChangeConn:Disconnect(); roomChangeConn = nil end
+if itemAddedConn then itemAddedConn:Disconnect(); itemAddedConn = nil end
+if itemRemovedConn then itemRemovedConn:Disconnect(); itemRemovedConn = nil end
+for model in pairs(TaskESPObjects) do
+RemoveTaskESP(model)
 end
 end
 ESP:AddToggle('TaskESP', {
@@ -2451,97 +2660,9 @@ ESP:AddToggle('TaskESP', {
     Default = false,
 Callback = function(Value)
 if Value then
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return end
-local roomsToCheck = {currentRoom, currentRoom + 1}
-for _, roomNumber in ipairs(roomsToCheck) do
-local room = workspace.CurrentRooms:FindFirstChild(tostring(roomNumber))
-if room then
-local key = room:FindFirstChild("KeyObtain", true)
-if key and not key:GetAttribute("Used") then
-AddTaskESP(key, "钥匙", TaskColor)
-end
-if Floor.Value == "Mines" then
-for _, fuse in ipairs(room:GetDescendants()) do
-if fuse.Name == "FuseObtain" and fuse.Parent and fuse.Parent.Name == "FuseHolder" then
-AddTaskESP(fuse, "保险丝", TaskColor)
-end
-end
-end
-if roomNumber == currentRoom then
-for _, book in ipairs(room:GetDescendants()) do
-if book.Name == "LiveHintBook" then
-AddTaskESP(book, "书", TaskColor)
-end
-end
-end
-if roomNumber == currentRoom then
-for _, breaker in ipairs(room:GetDescendants()) do
-if breaker.Name == "LiveBreakerPolePickup" then
-AddTaskESP(breaker, "断路器", TaskColor)
-end
-end
-end
-if Floor.Value == "Mines" then
-for _, anchor in ipairs(room:GetDescendants()) do
-if anchor.Name == "MinesAnchor" and anchor:FindFirstChild("Sign") then
-AddTaskESP(anchor, "锚 " .. anchor.Sign.TextLabel.Text, TaskColor)
-end
-end
-end
-if Floor.Value == "Mines" then
-for _, generator in ipairs(room:GetDescendants()) do
-if generator.Name == "GeneratorMain" then
-AddTaskESP(generator, "发电机", TaskColor)
-end
-end
-end
-if Floor.Value == "Mines" and roomNumber == currentRoom then
-for _, button in ipairs(room:GetDescendants()) do
-if button.Name == "MinesGateButton" then
-AddTaskESP(button, "门按钮", TaskColor)
-end
-end
-end
-if Floor.Value == "Mines" then
-for _, pump in ipairs(room:GetDescendants()) do
-if pump.Name == "WaterPump" then
-AddTaskESP(pump, "水泵", TaskColor)
-end
-end
-end
-local timerLever = room:FindFirstChild("TimerLever", true)
-if timerLever and timerLever.Name == "TimerLever" then
-AddTaskESP(timerLever, "倒计时拉杆", TaskColor)
-end
-for _, lever in ipairs(room:GetDescendants()) do
-if lever.Name == "LeverForGate" then
-AddTaskESP(lever, "门拉杆", TaskColor)
-end
-end
-if Floor.Value == "Garden" and roomNumber == currentRoom then
-for _, lever in ipairs(room:GetDescendants()) do
-if lever and lever.Parent and lever.Parent.Name == "VineGuillotine" and lever.Name == "Lever" then
-AddTaskESP(lever, "拉杆", TaskColor)
-end
-end
-end
-if Floor.Value == "Ripple" then
-for _, present in ipairs(room:GetDescendants()) do
-if present.Name == "CringlePresent" then
-AddTaskESP(present, "礼物盒", TaskColor)
-end
-end
-end
-end
-end
+startTaskESP()
 else
-for _, espObject in pairs(TaskESPObjects) do
-if espObject then
-espObject:Destroy()
-end
-end
-TaskESPObjects = {}
+stopTaskESP()
 end
 end
 }):AddColorPicker('TaskColor', {
@@ -2550,101 +2671,25 @@ end
     Transparency = 0,
 Callback = function(Value)
 TaskColor = Value
-for _, espObject in pairs(TaskESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
+if Toggles.TaskESP.Value then
+stopTaskESP()
+startTaskESP()
 end
 end
 })
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.TaskESP and Toggles.TaskESP.Value then
-for _, espObject in pairs(TaskESPObjects) do
-if espObject then
-espObject:Destroy()
-end
-end
-TaskESPObjects = {}
-Toggles.TaskESP:SetValue(false)
-Toggles.TaskESP:SetValue(true)
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.TaskESP and Toggles.TaskESP.Value then
-task.wait(0.1)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return end
-local inValidRoom = false
-local parent = v.Parent
-while parent do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and (roomNumber == currentRoom or roomNumber == currentRoom + 1) then
-inValidRoom = true
-break
-end
-end
-parent = parent.Parent
-end
-if not inValidRoom then return end
-if v.Name == "LiveHintBook" then
-AddTaskESP(v, "书", TaskColor)
-elseif v.Name == "LiveBreakerPolePickup" then
-AddTaskESP(v, "断路器", TaskColor)
-elseif v.Name == "MinesAnchor" and v:FindFirstChild("Sign") then
-AddTaskESP(v, "锚 " .. v.Sign.TextLabel.Text, TaskColor)
-elseif v.Name == "FuseObtain" and v.Parent and v.Parent.Name == "FuseHolder" then
-AddTaskESP(v, "保险丝", TaskColor)
-elseif v.Name == "WaterPump" then
-AddTaskESP(v, "水泵", TaskColor)
-elseif v.Name == "GeneratorMain" then
-AddTaskESP(v, "发电机", TaskColor)
-elseif v.Name == "KeyObtain" and not v:GetAttribute("Used") then
-AddTaskESP(v, "钥匙", TaskColor)
-elseif v.Name == "TimerLever" then
-AddTaskESP(v, "倒计时拉杆", TaskColor)
-elseif v.Name == "LeverForGate" then
-AddTaskESP(v, "门拉杆", TaskColor)
-elseif v.Name == "MinesGateButton" then
-AddTaskESP(v, "门按钮", TaskColor)
-elseif Floor.Value == "Garden" and v and v.Parent and v.Parent.Name == "VineGuillotine" and v.Name == "Lever" then
-AddTaskESP(v, "拉杆", TaskColor)
-elseif Floor.Value == "Ripple" and v.Name == "CringlePresent" then
-AddTaskESP(v, "礼物盒", TaskColor)
-end
-end
-end))
 
 local HidingSpots = {
-Wardrobe = "衣柜",
-Rooms_Locker = "衣柜",
-Backdoor_Wardrobe = "衣柜",
-Toolshed = "衣柜",
-Locker_Large = "衣柜",
-Bed = "床",
-CircularVent = "通风口",
-Rooms_Locker_Fridge = "冰箱",
-RetroWardrobe = "衣柜",
-Dumpster = "垃圾桶",
-Double_Bed = "床"
+Wardrobe = "衣柜", Rooms_Locker = "衣柜", Backdoor_Wardrobe = "衣柜",
+Toolshed = "衣柜", Locker_Large = "衣柜", Bed = "", CircularVent = "通行证",
+Rooms_Locker_Fridge = "冰箱", RetroWardrobe = "衣柜", Dumpster = "垃圾桶",
+Double_Bed = ""
 }
 local HidingSpotColor = Color3.new(0, 0.5, 0)
 local HidingSpotESPObjects = {}
-local function shouldShowHidingSpotESP(roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
-end
+local hidingUpdateLoop
 local function AddHidingSpotESP(model, text)
-if not model or not model.Parent or HidingSpotESPObjects[model] then return end
-local espObject = ESPLibrary:Add({
+if not model or not model.PrimaryPart or HidingSpotESPObjects[model] then return end
+local esp = ESPLibrary:Add({
 Name = text,
 Model = model,
 Color = HidingSpotColor,
@@ -2655,186 +2700,194 @@ FillColor = HidingSpotColor,
 OutlineColor = HidingSpotColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = HidingSpotColor,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = HidingSpotColor
-}
+Tracer = { Enabled = true, Color = HidingSpotColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = HidingSpotColor }
 })
-HidingSpotESPObjects[model] = espObject
-espObject:Show()
+HidingSpotESPObjects[model] = esp
+esp:Show()
 end
 local function RemoveHidingSpotESP(model)
-if HidingSpotESPObjects[model] then
-HidingSpotESPObjects[model]:Destroy()
+local esp = HidingSpotESPObjects[model]
+if esp then
+pcall(esp.Destroy, esp)
 HidingSpotESPObjects[model] = nil
 end
 end
-local function ScanAndAddHidingSpots()
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowHidingSpotESP(roomNumber) then
+local function startHidingSpotESP()
+hidingUpdateLoop = task.spawn(function()
+while Toggles.HidingSpotESP and Toggles.HidingSpotESP.Value do
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if currentRoom then
+for model, _ in pairs(HidingSpotESPObjects) do
+if not model or not model.Parent then
+RemoveHidingSpotESP(model)
+else
+local room = model:FindFirstAncestorOfClass("Model")
+while room and not room:IsDescendantOf(workspace.CurrentRooms) do
+room = room.Parent
+end
+local roomName = room and room.Name
+if roomName ~= tostring(currentRoom) then
+RemoveHidingSpotESP(model)
+end
+end
+end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if room then
 local assets = room:FindFirstChild("Assets")
 if assets then
 for _, spot in ipairs(assets:GetChildren()) do
-local spotName = HidingSpots[spot.Name]
-if spotName and spot.PrimaryPart then
-AddHidingSpotESP(spot, spotName)
+local name = HidingSpots[spot.Name]
+if name and spot.PrimaryPart then
+AddHidingSpotESP(spot, name)
 end
 end
 end
 end
 end
+task.wait()
 end
-local function ClearAllHidingSpotESP()
-for model, espObject in pairs(HidingSpotESPObjects) do
-if espObject then
-espObject:Destroy()
+for model in pairs(HidingSpotESPObjects) do
+RemoveHidingSpotESP(model)
 end
+end)
 end
-HidingSpotESPObjects = {}
+local function stopHidingSpotESP()
+if hidingUpdateLoop then
+task.cancel(hidingUpdateLoop)
+hidingUpdateLoop = nil
+end
+for model in pairs(HidingSpotESPObjects) do
+RemoveHidingSpotESP(model)
+end
 end
 ESP:AddToggle('HidingSpotESP', {
-Text = "躲藏点",
-Default = false,
+    Text = "躲藏点",
+    Default = false,
 Callback = function(Value)
 if Value then
-ScanAndAddHidingSpots()
+startHidingSpotESP()
 else
-ClearAllHidingSpotESP()
+stopHidingSpotESP()
 end
 end
 }):AddColorPicker('HidingSpotColorPicker', {
     Default = HidingSpotColor,
-    Title = '躲藏点颜色',
+    Title = '躲藏点',
     Transparency = 0,
 Callback = function(Value)
 HidingSpotColor = Value
-for model, espObject in pairs(HidingSpotESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
+if Toggles.HidingSpotESP.Value then
+stopHidingSpotESP()
+startHidingSpotESP()
 end
 end
 })
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.HidingSpotESP and Toggles.HidingSpotESP.Value then
-ClearAllHidingSpotESP()
-ScanAndAddHidingSpots()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.HidingSpotESP and Toggles.HidingSpotESP.Value then
-task.wait(0.1)
-local spotName = HidingSpots[v.Name]
-if spotName and v:IsA("Model") and v.PrimaryPart then
-local parent = v.Parent
-while parent and parent ~= workspace do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and shouldShowHidingSpotESP(roomNumber) then
-AddHidingSpotESP(v, spotName)
-break
-end
-end
-parent = parent.Parent
-end
-end
-end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if HidingSpotESPObjects[v] then
-RemoveHidingSpotESP(v)
-end
-end))
 
 local ChestColor = Color3.new(1, 0.8, 0)
 local ChestESPObjects = {}
-local function shouldShowChestESP(roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
-end
-local function AddChestESP(model, text, color)
+local chestRoomConn, chestAddedConn, chestRemovedConn
+local function AddChestESP(model, text)
 if not model or not model.Parent or ChestESPObjects[model] then return end
-local espObject = ESPLibrary:Add({
+local esp = ESPLibrary:Add({
 Name = text,
 Model = model,
-Color = color,
+Color = ChestColor,
 MaxDistance = 1000,
 TextSize = ESPGlobalSettings.TextSize,
 ESPType = ESPGlobalSettings.ESPType,
-FillColor = color,
-OutlineColor = color,
+FillColor = ChestColor,
+OutlineColor = ChestColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = color,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = color
-}
+Tracer = { Enabled = true, Color = ChestColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = ChestColor }
 })
-ChestESPObjects[model] = espObject
-espObject:Show()
+ChestESPObjects[model] = esp
+esp:Show()
 end
 local function RemoveChestESP(model)
-if ChestESPObjects[model] then
-ChestESPObjects[model]:Destroy()
+local esp = ChestESPObjects[model]
+if esp then
+pcall(esp.Destroy, esp)
 ChestESPObjects[model] = nil
 end
 end
-local function ScanAndAddChests()
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowChestESP(roomNumber) then
-for _, v in ipairs(room:GetDescendants()) do
-if v.Name == "Toolshed_Small" or v.Name == "Chest_Vine" or 
-v.Name == "ChestBoxLocked" or v.Name == "ChestBox" then
-local displayText = "宝箱"
-if v.Name == "Chest_Vine" then
-displayText = "[藤蔓] 宝箱"
-elseif v.Name == "ChestBoxLocked" then
-displayText = "[锁定] 宝箱"
-elseif v.Name == "Toolshed_Small" then
-displayText = "剪刀柜子"
+local function getChestText(model)
+local name = model.Name
+if name == "Chest_Vine" then
+return "[藤蔓] 宝箱"
+elseif name == "ChestBoxLocked" then
+return "[锁定] 宝箱"
+elseif name == "Toolshed_Small" then
+return "自动柜子"
+elseif name == "ChestBox" then
+return "宝箱"
 end
-AddChestESP(v, displayText, ChestColor)
+return nil
 end
-end
-end
-end
-end
-local function ClearAllChestESP()
-for model, espObject in pairs(ChestESPObjects) do
-if espObject then
-espObject:Destroy()
+local function scanChestsInCurrentRoom()
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if not room then return end
+for _, obj in ipairs(room:GetDescendants()) do
+local text = getChestText(obj)
+if text then
+AddChestESP(obj, text)
 end
 end
-ChestESPObjects = {}
+end
+local function isInCurrentRoom(obj)
+local anc = obj
+while anc do
+if anc == workspace.CurrentRooms then break end
+if anc.Name == tostring(LocalPlayer:GetAttribute("CurrentRoom")) then
+return true
+end
+anc = anc.Parent
+end
+return false
+end
+local function startChestESP()
+scanChestsInCurrentRoom()
+chestRoomConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for model in pairs(ChestESPObjects) do
+RemoveChestESP(model)
+end
+scanChestsInCurrentRoom()
+end)
+chestAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(obj)
+if not Toggles.Chest.Value then return end
+local text = getChestText(obj)
+if text and isInCurrentRoom(obj) then
+AddChestESP(obj, text)
+end
+end)
+chestRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(obj)
+if ChestESPObjects[obj] then
+RemoveChestESP(obj)
+elseif obj:IsA("BasePart") and obj.Parent and ChestESPObjects[obj.Parent] then
+RemoveChestESP(obj.Parent)
+end
+end)
+end
+local function stopChestESP()
+if chestRoomConn then chestRoomConn:Disconnect(); chestRoomConn = nil end
+if chestAddedConn then chestAddedConn:Disconnect(); chestAddedConn = nil end
+if chestRemovedConn then chestRemovedConn:Disconnect(); chestRemovedConn = nil end
+for model in pairs(ChestESPObjects) do
+RemoveChestESP(model)
+end
 end
 ESP:AddToggle('Chest', {
     Text = "宝箱",
     Default = false,
 Callback = function(Value)
 if Value then
-ScanAndAddChests()
+startChestESP()
 else
-ClearAllChestESP()
+stopChestESP()
 end
 end
 }):AddColorPicker('ChestColor', {
@@ -2843,105 +2896,94 @@ end
     Transparency = 0,
 Callback = function(Value)
 ChestColor = Value
-for model, espObject in pairs(ChestESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
+if Toggles.Chest.Value then
+stopChestESP()
+startChestESP()
 end
 end
 })
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.Chest and Toggles.Chest.Value then
-ClearAllChestESP()
-ScanAndAddChests()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.Chest and Toggles.Chest.Value then
-task.wait(0.1)
-if v.Name == "Toolshed_Small" or v.Name == "Chest_Vine" or 
-v.Name == "ChestBoxLocked" or v.Name == "ChestBox" then
-local parent = v.Parent
-while parent do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and shouldShowChestESP(roomNumber) then
-local displayText = "宝箱"
-if v.Name == "Chest_Vine" then
-displayText = "[藤蔓] 宝箱"
-elseif v.Name == "ChestBoxLocked" then
-displayText = "[锁定] 宝箱"
-elseif v.Name == "Toolshed_Small" then
-displayText = "剪刀柜子"
-end
-AddChestESP(v, displayText, ChestColor)
-break
-end
-end
-parent = parent.Parent
-end
-end
-end
-end))
 
 local PlayersColor = Color3.new(1, 1, 1)
 local PlayerESPObjects = {}
-local function AddPlayerESP(player, character, color)
+local playerConnections = {}
+local playerAddedConn, playerRemovingConn
+local function AddPlayerESP(player, character)
 if not character or not character.Parent or PlayerESPObjects[character] then return end
 local displayName = player.DisplayName or player.Name
-local espObject = ESPLibrary:Add({
+local esp = ESPLibrary:Add({
 Name = displayName,
 Model = character,
-Color = color,
+Color = PlayersColor,
 MaxDistance = 1000,
 TextSize = ESPGlobalSettings.TextSize,
 ESPType = ESPGlobalSettings.ESPType,
-FillColor = color,
-OutlineColor = color,
+FillColor = PlayersColor,
+OutlineColor = PlayersColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = color,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = color
-}
+Tracer = { Enabled = true, Color = PlayersColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = PlayersColor }
 })
-PlayerESPObjects[character] = {
-Object = espObject,
-Player = player
-}
-espObject:Show()
+PlayerESPObjects[character] = { Object = esp, Player = player }
+esp:Show()
 end
 local function RemovePlayerESP(character)
-if PlayerESPObjects[character] then
-PlayerESPObjects[character].Object:Destroy()
+local data = PlayerESPObjects[character]
+if data then
+pcall(data.Object.Destroy, data.Object)
 PlayerESPObjects[character] = nil
 end
 end
-local function ClearAllPlayerESP()
-for character, data in pairs(PlayerESPObjects) do
-if data.Object then
-data.Object:Destroy()
+local function setupPlayer(player)
+if playerConnections[player] then return end
+local conns = {}
+if player.Character then
+AddPlayerESP(player, player.Character)
+end
+conns.charAdded = player.CharacterAdded:Connect(function(char)
+AddPlayerESP(player, char)
+end)
+conns.charRemoved = player.CharacterRemoving:Connect(function(char)
+RemovePlayerESP(char)
+end)
+playerConnections[player] = conns
+end
+local function cleanupPlayer(player)
+local conns = playerConnections[player]
+if conns then
+if conns.charAdded then conns.charAdded:Disconnect() end
+if conns.charRemoved then conns.charRemoved:Disconnect() end
+playerConnections[player] = nil
+end
+for char, data in pairs(PlayerESPObjects) do
+if data.Player == player then
+RemovePlayerESP(char)
 end
 end
-PlayerESPObjects = {}
 end
-local function ScanAndAddPlayers()
+local function startPlayerESP()
 for _, player in ipairs(Players:GetPlayers()) do
-if player ~= LocalPlayer and player.Character then
-AddPlayerESP(player, player.Character, PlayersColor)
+if player ~= LocalPlayer then
+setupPlayer(player)
 end
+end
+playerAddedConn = Players.PlayerAdded:Connect(function(player)
+if player ~= LocalPlayer then
+setupPlayer(player)
+end
+end)
+playerRemovingConn = Players.PlayerRemoving:Connect(function(player)
+cleanupPlayer(player)
+end)
+end
+local function stopPlayerESP()
+if playerAddedConn then playerAddedConn:Disconnect(); playerAddedConn = nil end
+if playerRemovingConn then playerRemovingConn:Disconnect(); playerRemovingConn = nil end
+for _, player in ipairs(Players:GetPlayers()) do
+cleanupPlayer(player)
+end
+for char in pairs(PlayerESPObjects) do
+RemovePlayerESP(char)
 end
 end
 ESP:AddToggle('Players', {
@@ -2949,9 +2991,9 @@ ESP:AddToggle('Players', {
     Default = false,
 Callback = function(Value)
 if Value then
-ScanAndAddPlayers()
+startPlayerESP()
 else
-ClearAllPlayerESP()
+stopPlayerESP()
 end
 end
 }):AddColorPicker('PlayersColor', {
@@ -2960,123 +3002,22 @@ end
     Transparency = 0,
 Callback = function(Value)
 PlayersColor = Value
-for character, data in pairs(PlayerESPObjects) do
-if data.Object and data.Object.CurrentSettings then
-data.Object.CurrentSettings.Color = Value
-data.Object.CurrentSettings.FillColor = Value
-data.Object.CurrentSettings.OutlineColor = Value
-if data.Object.CurrentSettings.Tracer then
-data.Object.CurrentSettings.Tracer.Color = Value
-end
-data.Object:Hide()
-data.Object:Show()
-end
+if Toggles.Players.Value then
+stopPlayerESP()
+startPlayerESP()
 end
 end
 })
-table.insert(Connections, Players.PlayerAdded:Connect(function(player)
-if Toggles.Players and Toggles.Players.Value then
-player.CharacterAdded:Connect(function(character)
-if Toggles.Players and Toggles.Players.Value then
-AddPlayerESP(player, character, PlayersColor)
-end
-end)
-end
-end))
-table.insert(Connections, Players.PlayerRemoving:Connect(function(player)
-if Toggles.Players and Toggles.Players.Value then
-if player.Character then
-RemovePlayerESP(player.Character)
-end
-end
-end))
-for _, player in ipairs(Players:GetPlayers()) do
-if player ~= LocalPlayer then
-table.insert(Connections, player.CharacterAdded:Connect(function(character)
-if Toggles.Players and Toggles.Players.Value then
-AddPlayerESP(player, character, PlayersColor)
-end
-end))
-table.insert(Connections, player.CharacterRemoving:Connect(function(character)
-if Toggles.Players and Toggles.Players.Value then
-RemovePlayerESP(character)
-end
-end))
-if Toggles.Players and Toggles.Players.Value and player.Character then
-AddPlayerESP(player, player.Character, PlayersColor)
-end
-end
-end
-table.insert(Connections, RunService.RenderStepped:Connect(function()
-if Toggles.Players and Toggles.Players.Value then
-for character, data in pairs(PlayerESPObjects) do
-if data.Object and data.Object.CurrentSettings then
-data.Object.CurrentSettings.TextSize = ESPGlobalSettings.TextSize
-data.Object.CurrentSettings.FillTransparency = ESPGlobalSettings.FillTransparency
-data.Object.CurrentSettings.OutlineTransparency = ESPGlobalSettings.OutlineTransparency
-data.Object.CurrentSettings.Tracer.Enabled = ESPGlobalSettings.TracerEnabled
-data.Object.CurrentSettings.Tracer.Color = PlayersColor
-if not data.Player or not data.Player.Parent or not character or not character.Parent then
-RemovePlayerESP(character)
-else
-local displayName = data.Player.DisplayName or data.Player.Name
-if data.Object.CurrentSettings.Name ~= displayName then
-data.Object.CurrentSettings.Name = displayName
-if data.Object.GUI and data.Object.GUI.Txt then
-data.Object.GUI.Txt.Text = displayName
-end
-end
-end
-data.Object:Hide()
-data.Object:Show()
-end
-end
-end
-end))
 
 local GoldColor = Color3.new(1, 0.8, 0)
 local GoldESPObjects = {}
-ESP:AddToggle('GoldESP', {
-    Text = "金币",
-    Default = false,
-Callback = function(Value)
-if Value then
-ScanAndAddGoldESP()
-else
-ClearAllGoldESP()
-end
-end
-}):AddColorPicker('GoldColorPicker', {
-    Default = GoldColor,
-    Title = '金币颜色',
-    Transparency = 0,
-Callback = function(Value)
-GoldColor = Value
-if Toggles.GoldESP and Toggles.GoldESP.Value then
-RefreshGoldESPColor()
-end
-end
-})
-local function RefreshGoldESPColor()
-for model, espObject in pairs(GoldESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = GoldColor
-espObject.CurrentSettings.FillColor = GoldColor
-espObject.CurrentSettings.OutlineColor = GoldColor
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = GoldColor
-end
-espObject:Hide()
-espObject:Show()
-end
-end
-end
+local goldRoomConn, goldAddedConn, goldRemovedConn
 local function AddGoldESP(goldPile)
 if not goldPile or not goldPile.Parent or GoldESPObjects[goldPile] then return end
-local goldValue = goldPile:GetAttribute("GoldValue") or 0
-local displayText = "金币 [" .. goldValue .. "]"
-local espObject = ESPLibrary:Add({
-Name = displayText,
+local goldValue = goldPile:GetAttribute("GoldValue")
+local text = "金币 [" .. goldValue .. "]"
+local esp = ESPLibrary:Add({
+Name = text,
 Model = goldPile,
 Color = GoldColor,
 MaxDistance = 1000,
@@ -3086,300 +3027,260 @@ FillColor = GoldColor,
 OutlineColor = GoldColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = GoldColor,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = GoldColor
-}
+Tracer = { Enabled = true, Color = GoldColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = GoldColor }
 })
-GoldESPObjects[goldPile] = espObject
-espObject:Show()
+GoldESPObjects[goldPile] = esp
+esp:Show()
 end
 local function RemoveGoldESP(goldPile)
-if GoldESPObjects[goldPile] then
-GoldESPObjects[goldPile]:Destroy()
+local esp = GoldESPObjects[goldPile]
+if esp then
+pcall(esp.Destroy, esp)
 GoldESPObjects[goldPile] = nil
 end
 end
-local function ScanAndAddGoldESP()
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowESP(roomNumber) then
+local function isInCurrentRoom(obj)
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return false end
+local anc = obj
+while anc and anc ~= workspace do
+if anc.Name == tostring(currentRoom) and anc.Parent == workspace.CurrentRooms then
+return true
+end
+anc = anc.Parent
+end
+return false
+end
+local function scanGoldInCurrentRoom()
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if not room then return end
 for _, goldPile in ipairs(room:GetDescendants()) do
 if goldPile.Name == "GoldPile" then
 AddGoldESP(goldPile)
 end
 end
 end
+local function startGoldESP()
+scanGoldInCurrentRoom()
+goldRoomConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for model in pairs(GoldESPObjects) do
+RemoveGoldESP(model)
+end
+scanGoldInCurrentRoom()
+end)
+goldAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(obj)
+if not Toggles.GoldESP.Value then return end
+if obj.Name == "GoldPile" and isInCurrentRoom(obj) then
+AddGoldESP(obj)
+end
+end)
+goldRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(obj)
+if GoldESPObjects[obj] then
+RemoveGoldESP(obj)
+end
+end)
+end
+local function stopGoldESP()
+if goldRoomConn then goldRoomConn:Disconnect(); goldRoomConn = nil end
+if goldAddedConn then goldAddedConn:Disconnect(); goldAddedConn = nil end
+if goldRemovedConn then goldRemovedConn:Disconnect(); goldRemovedConn = nil end
+for model in pairs(GoldESPObjects) do
+RemoveGoldESP(model)
 end
 end
-local function ClearAllGoldESP()
-for model, espObject in pairs(GoldESPObjects) do
-if espObject then
-espObject:Destroy()
+ESP:AddToggle('GoldESP', {
+    Text = "金币",
+    Default = false,
+Callback = function(Value)
+if Value then
+startGoldESP()
+else
+stopGoldESP()
 end
 end
-GoldESPObjects = {}
-end
-local function shouldShowESP(roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
-end
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.GoldESP and Toggles.GoldESP.Value then
-ClearAllGoldESP()
-ScanAndAddGoldESP()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.GoldESP and Toggles.GoldESP.Value then
-task.wait(0.1)
-if v.Name == "GoldPile" then
-local parent = v.Parent
-while parent do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and shouldShowESP(roomNumber) then
-AddGoldESP(v)
-break
+}):AddColorPicker('GoldColorPicker', {
+    Default = GoldColor,
+    Title = '金币颜色',
+    Transparency = 0,
+Callback = function(Value)
+GoldColor = Value
+if Toggles.GoldESP.Value then
+stopGoldESP()
+startGoldESP()
 end
 end
-parent = parent.Parent
-end
-end
-end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if GoldESPObjects[v] then
-RemoveGoldESP(v)
-end
-end))
+})
 
 local ItemsColor = Color3.new(1, 0, 1)
 local ItemsESPObjects = {}
+local itemsRoomConn, itemsAddedConn, itemsRemovedConn
+local dropsAddedConn, dropsRemovedConn
 local Item = {
-    Flashlight = "手电筒",
-    Lockpick = "撬锁器",
-    Lighter = "打火机",
-    Vitamins = "维生素",
-    Bandage = "创口贴",
-    StarVial = "小星瓶",
-    StarBottle = "星瓶",
-    StarJug = "星罐",
-    Shakelight = "手摇电筒",
-    Straplight = "背带灯",
-    Bulklight = "散装灯",
-    Battery = "电池",
-    Candle = "蜡烛",
-    Crucifix = "十字架",
-    CrucifixWall = "十字架",
-    Glowsticks = "荧光棒",
-    SkeletonKey = "骷髅钥匙",
-    Candy = "糖果",
-    ShieldMini = "迷你盾牌",
-    ShieldBig = "大盾牌",
-    BandagePack = "创口贴包装盒",
-    BatteryPack = "电池包装盒",
-    RiftCandle = "月光蜡烛",
-    LaserPointer = "激光笔",
-    HolyGrenade = "神圣手雷",
-    Shears = "剪刀",
-    Smoothie = "奶昔",
-    Cheese = "奶酪",
-    Bread = "面包",
-    AlarmClock = "闹钟",
-    RiftSmoothie = "月光奶昔",
-    GweenSoda = "苏打水",
-    GlitchCube = "故障方块",
-    RiftJar = "裂缝罐",
-    Compass = "罗盘",
-    Lantern = "手提灯",
-    Multitool = "万能工具",
-    Lotus = "莲花",
-    TipJar = "小费罐",
-    LotusPetalPickup = "莲花花瓣",
-    KeyIron = "铁钥匙",
-    CandyBag = "糖果袋子",
-    Donut = "甜甜圈"
+Flashlight = "手电筒", Lockpick = "��", Lighter = "打火机", Vitamins = "维生素",
+Bandage = "创口贴", StarVial = "小星星", StarBottle = "星瓶", StarJug = "星罐",
+Shakelight = "手摇电筒", Straplight = "背带裤", Bulklight = "散弹枪", Battery = "电池",
+Candle = "蜡烛", Crucifix = "十字架", CrucifixWall = "十字架", Glowsticks = "荧光笔",
+SkeletonKey = "骷髅钥匙", Candy = "糖果", ShieldMini = "迷你盾牌", ShieldBig = "大盾牌",
+BandagePack = "创口贴包装盒", BatteryPack = "电池包高亮", RiftCandle = "月光蜡烛",
+LaserPointer = "荧光笔", HolyGrenade = "神圣手雷", Shears = "��", Smoothie = "奶昔",
+Cheese = "奶酪", Bread = "面包", AlarmClock = "闹钟", RiftSmoothie = "月光奶昔",
+GweenSoda = "苏打水", GlitchCube = "故障方块", RiftJar = "裂缝门", Compass = "罗盘",
+Lantern = "手电筒", Multitool = "万能工具", Lotus = "莲花", TipJar = "小费罐",
+LotusPetalPickup = "莲花花瓣", KeyIron = "铁钥匙", CandyBag = "糖果袋子", Donut = "甜甜圈"
 }
-local function isPlayerOwnedItem(instance)
-local current = instance
-while current and current ~= workspace do
-if current:IsA("Model") then
-local player = Players:GetPlayerFromCharacter(current)
-if player and player == LocalPlayer then
-return true
-end
-if current:IsA("Tool") then
-local owner = current:FindFirstChild("Owner")
-if owner and owner.Value then
-return true
-end
-local parent = current.Parent
-if parent and (parent:IsA("Backpack") or (parent:IsA("Model") and Players:GetPlayerFromCharacter(parent))) then
-return true
-end
-end
-end
-current = current.Parent
-end
-return false
-end
-local function AddItemESP(item, text, color)
+local function AddItemESP(item, text)
 if not item or not item.Parent then return end
-if isPlayerOwnedItem(item) then
-return
-end
 local model = item
-if item:IsA("BasePart") and item.Parent and item.Parent:IsA("Model") then
-model = item.Parent
+if item:IsA("BasePart") and item.Parent:IsA("Model") then model = item.Parent end
+if ItemsESPObjects[model] then return end
+if model:IsA("Tool") then
+local owner = model:FindFirstChild("Owner") and model.Owner.Value
+if owner == LocalPlayer then return end
 end
-if isPlayerOwnedItem(model) then
+if model:IsDescendantOf(LocalPlayer.Character) or model:IsDescendantOf(LocalPlayer.Backpack) then
 return
 end
-if ItemsESPObjects[model] then
-ItemsESPObjects[model]:Hide()
-end
-local espObject = ESPLibrary:Add({
+local esp = ESPLibrary:Add({
 Name = text,
 Model = model,
-Color = color,
+Color = ItemsColor,
 MaxDistance = 1000,
 TextSize = ESPGlobalSettings.TextSize,
 ESPType = ESPGlobalSettings.ESPType,
-FillColor = color,
-OutlineColor = color,
+FillColor = ItemsColor,
+OutlineColor = ItemsColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = color,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = color
-}
+Tracer = { Enabled = true, Color = ItemsColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = ItemsColor }
 })
-ItemsESPObjects[model] = espObject
-espObject:Show()
+ItemsESPObjects[model] = esp
+esp:Show()
 end
-local function RemoveItemESP(item)
-local model = item
-if item:IsA("BasePart") and item.Parent and item.Parent:IsA("Model") then
-model = item.Parent
-end
-if ItemsESPObjects[model] then
-ItemsESPObjects[model]:Destroy()
+local function RemoveItemESP(model)
+local esp = ItemsESPObjects[model]
+if esp then
+pcall(esp.Destroy, esp)
 ItemsESPObjects[model] = nil
 end
 end
-local function ScanAndAddItemsESP()
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber then
-for _, v in ipairs(room:GetDescendants()) do
-local itemName = Item[v.Name]
-if itemName and v:IsA("Model") and v.PrimaryPart then
-AddItemESP(v, itemName, ItemsColor)
+local function isInCurrentRoom(obj)
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return false end
+if obj:IsDescendantOf(workspace:FindFirstChild("Drops") or workspace) then
+return obj:FindFirstAncestor("Drops") ~= nil
+end
+local anc = obj
+while anc and anc ~= workspace do
+if anc.Name == tostring(currentRoom) and anc.Parent == workspace.CurrentRooms then
+return true
+end
+anc = anc.Parent
+end
+return false
+end
+local function scanItemsInCurrentScope()
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if room then
+for _, obj in ipairs(room:GetDescendants()) do
+local text = Item[obj.Name]
+if text and obj:IsA("Model") and obj.PrimaryPart then
+AddItemESP(obj, text)
+end
+end
+end
+local drops = workspace:FindFirstChild("Drops")
+if drops then
+for _, drop in ipairs(drops:GetChildren()) do
+local text = Item[drop.Name]
+if text and drop:IsA("Model") and drop.PrimaryPart then
+AddItemESP(drop, text)
 end
 end
 end
 end
-local dropsFolder = workspace:FindFirstChild("Drops")
-if dropsFolder then
-for _, drop in ipairs(dropsFolder:GetChildren()) do
-local itemName = Item[drop.Name]
-if itemName and drop:IsA("Model") and drop.PrimaryPart then
-AddItemESP(drop, itemName, ItemsColor)
+local function startItemsESP()
+scanItemsInCurrentScope()
+itemsRoomConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for model in pairs(ItemsESPObjects) do
+RemoveItemESP(model)
+end
+scanItemsInCurrentScope()
+end)
+itemsAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(obj)
+if not Toggles.Items.Value then return end
+local text = Item[obj.Name]
+if text and obj:IsA("Model") and obj.PrimaryPart and isInCurrentRoom(obj) then
+AddItemESP(obj, text)
+end
+end)
+itemsRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(obj)
+if ItemsESPObjects[obj] then
+RemoveItemESP(obj)
+elseif obj:IsA("BasePart") and obj.Parent and ItemsESPObjects[obj.Parent] then
+RemoveItemESP(obj.Parent)
+end
+end)
+local drops = workspace:FindFirstChild("Drops")
+if drops then
+dropsAddedConn = drops.ChildAdded:Connect(function(child)
+if not Toggles.Items.Value then return end
+local text = Item[child.Name]
+if text and child:IsA("Model") and child.PrimaryPart then
+AddItemESP(child, text)
+end
+end)
+dropsRemovedConn = drops.ChildRemoved:Connect(function(child)
+if ItemsESPObjects[child] then
+RemoveItemESP(child)
+end
+end)
 end
 end
+local function stopItemsESP()
+if itemsRoomConn then itemsRoomConn:Disconnect(); itemsRoomConn = nil end
+if itemsAddedConn then itemsAddedConn:Disconnect(); itemsAddedConn = nil end
+if itemsRemovedConn then itemsRemovedConn:Disconnect(); itemsRemovedConn = nil end
+if dropsAddedConn then dropsAddedConn:Disconnect(); dropsAddedConn = nil end
+if dropsRemovedConn then dropsRemovedConn:Disconnect(); dropsRemovedConn = nil end
+for model in pairs(ItemsESPObjects) do
+RemoveItemESP(model)
 end
-end
-local function ClearAllItemsESP()
-for model, espObject in pairs(ItemsESPObjects) do
-if espObject then
-espObject:Destroy()
-end
-end
-ItemsESPObjects = {}
 end
 ESP:AddToggle('Items', {
     Text = "物品",
-Default = false,
+    Default = false,
 Callback = function(Value)
 if Value then
-ScanAndAddItemsESP()
+startItemsESP()
 else
-ClearAllItemsESP()
+stopItemsESP()
 end
 end
 }):AddColorPicker('ItemsColorPicker', {
     Default = ItemsColor,
     Title = '物品颜色',
-Transparency = 0,
+    Transparency = 0,
 Callback = function(Value)
 ItemsColor = Value
-if Toggles.Items and Toggles.Items.Value then
-for model, espObject in pairs(ItemsESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
-end
+if Toggles.Items.Value then
+stopItemsESP()
+startItemsESP()
 end
 end
 })
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.Items and Toggles.Items.Value then
-ClearAllItemsESP()
-task.wait(0.5)
-ScanAndAddItemsESP()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.Items and Toggles.Items.Value then
-task.wait(0.1)
-local itemName = Item[v.Name]
-if itemName and v:IsA("Model") and v.PrimaryPart then
-local parent = v.Parent
-while parent and parent ~= workspace do
-if parent:IsDescendantOf(workspace.CurrentRooms) or parent.Name == "Drops" then
-AddItemESP(v, itemName, ItemsColor)
-break
-end
-parent = parent.Parent
-end
-end
-end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if ItemsESPObjects[v] then
-RemoveItemESP(v)
-end
-end))
 
 local StardustColor = Color3.new(1, 0.5, 0.8)
 local StardustESPObjects = {}
-local function shouldShowESP(roomNumber)
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if not currentRoom then return false end
-return roomNumber == currentRoom or roomNumber == currentRoom + 1
-end
+local stardustRoomConn, stardustAddedConn, stardustRemovedConn
 local function AddStardustESP(stardust)
 if not stardust or not stardust.Parent or StardustESPObjects[stardust] then return end
-local espObject = ESPLibrary:Add({
+local esp = ESPLibrary:Add({
 Name = "星尘",
 Model = stardust,
 Color = StardustColor,
@@ -3390,53 +3291,78 @@ FillColor = StardustColor,
 OutlineColor = StardustColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = StardustColor,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = StardustColor
-}
+Tracer = { Enabled = true, Color = StardustColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = StardustColor }
 })
-StardustESPObjects[stardust] = espObject
-espObject:Show()
+StardustESPObjects[stardust] = esp
+esp:Show()
 end
 local function RemoveStardustESP(stardust)
-if StardustESPObjects[stardust] then
-StardustESPObjects[stardust]:Destroy()
+local esp = StardustESPObjects[stardust]
+if esp then
+pcall(esp.Destroy, esp)
 StardustESPObjects[stardust] = nil
 end
 end
-local function ScanAndAddStardustESP()
-for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
-local roomNumber = tonumber(room.Name)
-if roomNumber and shouldShowESP(roomNumber) then
+local function isInCurrentRoom(obj)
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return false end
+local anc = obj
+while anc and anc ~= workspace do
+if anc.Name == tostring(currentRoom) and anc.Parent == workspace.CurrentRooms then
+return true
+end
+anc = anc.Parent
+end
+return false
+end
+local function scanStardustInCurrentRoom()
+local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
+if not currentRoom then return end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
+if not room then return end
 for _, stardust in ipairs(room:GetDescendants()) do
 if stardust.Name == "StardustPickup" then
 AddStardustESP(stardust)
 end
 end
 end
+local function startStardustESP()
+scanStardustInCurrentRoom()
+stardustRoomConn = LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
+for model in pairs(StardustESPObjects) do
+RemoveStardustESP(model)
 end
+scanStardustInCurrentRoom()
+end)
+stardustAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(obj)
+if not Toggles.Stardust.Value then return end
+if obj.Name == "StardustPickup" and isInCurrentRoom(obj) then
+AddStardustESP(obj)
 end
-local function ClearAllStardustESP()
-for model, espObject in pairs(StardustESPObjects) do
-if espObject then
-espObject:Destroy()
+end)
+stardustRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(obj)
+if StardustESPObjects[obj] then
+RemoveStardustESP(obj)
 end
+end)
 end
-StardustESPObjects = {}
+local function stopStardustESP()
+if stardustRoomConn then stardustRoomConn:Disconnect(); stardustRoomConn = nil end
+if stardustAddedConn then stardustAddedConn:Disconnect(); stardustAddedConn = nil end
+if stardustRemovedConn then stardustRemovedConn:Disconnect(); stardustRemovedConn = nil end
+for model in pairs(StardustESPObjects) do
+RemoveStardustESP(model)
+end
 end
 ESP:AddToggle('Stardust', {
     Text = "星尘",
     Default = false,
-Callback = function(Value)
+    Callback = function(Value)
 if Value then
-ScanAndAddStardustESP()
+startStardustESP()
 else
-ClearAllStardustESP()
+stopStardustESP()
 end
 end
 }):AddColorPicker('StardustColor', {
@@ -3445,75 +3371,21 @@ end
     Transparency = 0,
 Callback = function(Value)
 StardustColor = Value
-for model, espObject in pairs(StardustESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
+if Toggles.Stardust.Value then
+stopStardustESP()
+startStardustESP()
 end
 end
 })
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.Stardust and Toggles.Stardust.Value then
-ClearAllStardustESP()
-ScanAndAddStardustESP()
-end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.Stardust and Toggles.Stardust.Value then
-task.wait(0.1)
-if v.Name == "StardustPickup" then
-local parent = v.Parent
-while parent do
-if parent:IsDescendantOf(workspace.CurrentRooms) then
-local roomNumber = tonumber(parent.Name)
-if roomNumber and shouldShowESP(roomNumber) then
-AddStardustESP(v)
-break
-end
-end
-parent = parent.Parent
-end
-end
-end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if StardustESPObjects[v] then
-RemoveStardustESP(v)
-end
-end))
 
 local EntityColor = Color3.new(1, 0, 0)
 local EntityESPObjects = {}
-local EntityMap = {
-    RushMoving = "Rush",
-    AmbushMoving = "Ambush",
-    GlitchRush = "GlitchRush",
-    GlitchAmbush = "GlitchAmbush",
-    A60 = "A-60",
-    A120 = "A-120",
-    Eyes = "Eyes",
-    BackdoorLookman = "Lookman",
-    BackdoorRush = "Blitz",
-    Groundskeeper = "Groundskeeper",
-    MonumentEntity = "Monument",
-    FigureRig = "Figure",
-    FigureRagdoll = "Figure",
-    LiveEntityBramble = "Bramble"
-}
+local entityAddedConn, entityRemovedConn
+local roomDescAddedConn, roomDescRemovedConn
 local function addEntityESP(entity, label)
-if not entity or not entity.Parent then return end
-local base = entity.PrimaryPart
-if not base then
-base = entity:FindFirstChildWhichIsA("BasePart")
+if not entity or not entity.Parent or EntityESPObjects[entity] then return end
+local base = entity:FindFirstChildWhichIsA("BasePart")
 if not base then return end
-end
 if not entity:FindFirstChildOfClass("Humanoid") then
 local humanoid = Instance.new("Humanoid")
 humanoid.Name = "ESP_Humanoid"
@@ -3521,152 +3393,116 @@ humanoid.Parent = entity
 humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 end
 base.Transparency = 0.99
-local espObject = ESPLibrary:Add({
+local esp = ESPLibrary:Add({
 Name = label,
 Model = entity,
 Color = EntityColor,
 MaxDistance = 1000,
 TextSize = ESPGlobalSettings.TextSize,
-ESPType = "Highlight",
+ESPType = ESPGlobalSettings.ESPType,
 FillColor = EntityColor,
 OutlineColor = EntityColor,
 FillTransparency = ESPGlobalSettings.FillTransparency,
 OutlineTransparency = ESPGlobalSettings.OutlineTransparency,
-Tracer = { 
-Enabled = true,
-Color = EntityColor,
-From = "Bottom"
-},
-Arrow = {
-Enabled = true,
-Color = EntityColor
-}
+Tracer = { Enabled = true, Color = EntityColor, Thickness = ESPGlobalSettings.TracerThickness, From = ESPGlobalSettings.TracerPosition },
+Arrow = { Enabled = true, Color = EntityColor }
 })
-EntityESPObjects[entity] = espObject
-espObject:Show()
+EntityESPObjects[entity] = esp
+esp:Show()
 end
 local function removeEntityESP(entity)
-if EntityESPObjects[entity] then
-EntityESPObjects[entity]:Destroy()
+local esp = EntityESPObjects[entity]
+if esp then
+pcall(esp.Destroy, esp)
 EntityESPObjects[entity] = nil
 end
 end
-local function scanAndAddEntityESP()
-for _, entity in ipairs(workspace:GetChildren()) do
-local label = EntityMap[entity.Name]
+local function getEntityLabel(instance)
+local name = instance.Name
+if name == "RushMoving" then return "Rush"
+elseif name == "AmbushMoving" then return "Ambush"
+elseif name == "GlitchRush" then return "GlitchRush"
+elseif name == "GlitchAmbush" then return "GlitchAmbush"
+elseif name == "A60" then return "A-60"
+elseif name == "A120" then return "A-120"
+elseif name == "Eyes" then return "Eyes"
+elseif name == "BackdoorLookman" then return "Lookman"
+elseif name == "BackdoorRush" then return "Blitz"
+elseif name == "Groundskeeper" then return "Groundskeeper"
+elseif name == "FigureRig" or name == "FigureRagdoll" then return "Figure"
+elseif name == "LiveEntityBramble" then return "Bramble"
+elseif name == "GrumbleRig" then return "Grumble"
+elseif name == "MonumentEntity" then
+local top = instance:FindFirstChild("Top")
+if top then
+return "Monument", top
+end
+end
+return nil
+end
+local function tryAddEntity(instance)
+local label, model = getEntityLabel(instance)
 if label then
-addEntityESP(entity, label)
+addEntityESP(model or instance, label)
+return true
 end
+return false
 end
-local currentRoom = LocalPlayer:GetAttribute("CurrentRoom")
-if currentRoom then
-local room = workspace.CurrentRooms:FindFirstChild(tostring(currentRoom))
-if room then
-local groundskeeper = room:FindFirstChild("Groundskeeper", true)
-if groundskeeper then
-addEntityESP(groundskeeper, "Groundskeeper")
-end
-local figure = room:FindFirstChild("FigureRig", true) or room:FindFirstChild("FigureRagdoll", true)
-if figure then
-addEntityESP(figure, "Figure")
-end
-local bramble = room:FindFirstChild("LiveEntityBramble", true)
-if bramble then
-addEntityESP(bramble, "Bramble")
-end
-for _, descendant in ipairs(room:GetDescendants()) do
-local label = EntityMap[descendant.Name]
-if label then
-addEntityESP(descendant, label)
-end
-end
-end
+local function startEntitiesESP()
+for _, child in ipairs(workspace:GetChildren()) do
+tryAddEntity(child)
 end
 for _, room in ipairs(workspace.CurrentRooms:GetChildren()) do
 for _, descendant in ipairs(room:GetDescendants()) do
-local label = EntityMap[descendant.Name]
-if label and not EntityESPObjects[descendant] then
-addEntityESP(descendant, label)
+tryAddEntity(descendant)
 end
 end
+entityAddedConn = workspace.ChildAdded:Connect(function(child)
+if not Toggles.EntitiesESP.Value then return end
+tryAddEntity(child)
+end)
+entityRemovedConn = workspace.ChildRemoved:Connect(function(child)
+removeEntityESP(child)
+end)
+roomDescAddedConn = workspace.CurrentRooms.DescendantAdded:Connect(function(descendant)
+if not Toggles.EntitiesESP.Value then return end
+tryAddEntity(descendant)
+end)
+roomDescRemovedConn = workspace.CurrentRooms.DescendantRemoving:Connect(function(descendant)
+removeEntityESP(descendant)
+end)
 end
-end
-local function clearAllEntityESP()
-for entity, espObject in pairs(EntityESPObjects) do
-if espObject then
-espObject:Destroy()
-end
-end
-EntityESPObjects = {}
-end
-ESP:AddToggle('EntitiesESP',{
-     Text = "实体",
-     Default = false,
-Callback = function(Value)
-if Value then
-scanAndAddEntityESP()
-else
-clearAllEntityESP()
-end
-end
-}):AddColorPicker('EntityColorPicker', {
-     Default = EntityColor,
-     Title = '实体颜色',
-     Transparency = 0,
-Callback = function(Value)
-EntityColor = Value
-for entity, espObject in pairs(EntityESPObjects) do
-if espObject and espObject.CurrentSettings then
-espObject.CurrentSettings.Color = Value
-espObject.CurrentSettings.FillColor = Value
-espObject.CurrentSettings.OutlineColor = Value
-if espObject.CurrentSettings.Tracer then
-espObject.CurrentSettings.Tracer.Color = Value
-end
-espObject:Hide()
-espObject:Show()
-end
-end
-end
-})
-table.insert(Connections, workspace.ChildAdded:Connect(function(v)
-if Toggles.EntitiesESP and Toggles.EntitiesESP.Value then
-local label = EntityMap[v.Name]
-if label then
-task.wait(0.5)
-addEntityESP(v, label)
-end
-end
-end))
-table.insert(Connections, workspace.ChildRemoved:Connect(function(v)
-if EntityESPObjects[v] then
-removeEntityESP(v)
-end
-end))
-table.insert(Connections, LocalPlayer:GetAttributeChangedSignal("CurrentRoom"):Connect(function()
-if Toggles.EntitiesESP and Toggles.EntitiesESP.Value then
-for entity, espObject in pairs(EntityESPObjects) do
-if entity:IsDescendantOf(workspace.CurrentRooms) then
+local function stopEntitiesESP()
+if entityAddedConn then entityAddedConn:Disconnect(); entityAddedConn = nil end
+if entityRemovedConn then entityRemovedConn:Disconnect(); entityRemovedConn = nil end
+if roomDescAddedConn then roomDescAddedConn:Disconnect(); roomDescAddedConn = nil end
+if roomDescRemovedConn then roomDescRemovedConn:Disconnect(); roomDescRemovedConn = nil end
+for entity, _ in pairs(EntityESPObjects) do
 removeEntityESP(entity)
 end
 end
-scanAndAddEntityESP()
+ESP:AddToggle('EntitiesESP', {
+    Text = "实体",
+    Default = false,
+Callback = function(Value)
+if Value then
+startEntitiesESP()
+else
+stopEntitiesESP()
 end
-end))
-table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
-if Toggles.EntitiesESP and Toggles.EntitiesESP.Value then
-task.wait(0.1)
-local label = EntityMap[v.Name]
-if label and v:IsDescendantOf(workspace.CurrentRooms) then
-addEntityESP(v, label)
+end
+}):AddColorPicker('EntityColorPicker', {
+    Default = EntityColor,
+    Title = '实体颜色',
+    Transparency = 0,
+Callback = function(Value)
+EntityColor = Value
+if Toggles.EntitiesESP.Value then
+stopEntitiesESP()
+startEntitiesESP()
 end
 end
-end))
-table.insert(Connections, workspace.DescendantRemoving:Connect(function(v)
-if EntityESPObjects[v] then
-removeEntityESP(v)
-end
-end))
+})
 
 NotifyBox:AddDropdown("EntitiesPicker", {
     Values = { "Rush","Ambush","A-60","A-120","Eyes","Lookman","Blitz","GlitchRush","GlitchAmbush","Monument","Groundskeeper","Seek"},
@@ -3820,7 +3656,7 @@ NySet:AddInput("ChatMessageFormat", {
     Numeric = false,
     Finished = false,
     Text = "聊天消息格式",
-    Tooltip = "% 将被替换为实体名称",
+    Tooltip = "% 将替换为实体名称",
 Callback = function(Value)
 end,
 })
@@ -3837,7 +3673,7 @@ end,
 })
 
 NySet:AddToggle('PlaySound',{
-    Text = "播放声音",
+    Text = "去除声音",
     Default = true,
 Callback = function(Value)
 PlayingSound = Value
@@ -3851,14 +3687,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "Rush",
 Desc = "Rush 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://11102256553",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Rush 已生成！快去寻找躲藏点！", 3)
+Library:Notify("Rush 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3867,14 +3703,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "Blitz",
 Desc = "Blitz 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://140595207306444",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Blitz 已生成！快去寻找躲藏点！", 3)
+Library:Notify("Blitz 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3899,14 +3735,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "Ambush",
 Desc = "Ambush 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://10938726652",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Ambush 已生成！快去寻找躲藏点！", 3)
+Library:Notify("Ambush 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3915,14 +3751,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "A-60",
 Desc = "A-60 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://12350986086",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("A-60 已生成！快去寻找躲藏点！", 3)
+Library:Notify("A-60 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3931,14 +3767,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "A-120",
 Desc = "A-120 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://12351008553",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("A-120 已生成！快去寻找躲藏点！", 3)
+Library:Notify("A-120 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3963,14 +3799,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "GlitchRush",
 Desc = "GlitchRush 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://11102256553",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("GlitchRush 已生成！快去寻找躲藏点！", 3)
+Library:Notify("GlitchRush 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -3979,14 +3815,14 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "GlitchAmbush",
 Desc = "GlitchAmbush 已生成",
-Reason = "快去寻找躲藏点",
+Reason = "��寻找躲藏点",
 Image = "rbxassetid://10938726652",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("GlitchAmbush 已生成！快去寻找躲藏点！", 3)
+Library:Notify("GlitchAmbush 已生成！请寻找躲藏点！", 3)
 Sound()
 end
 end
@@ -4002,7 +3838,7 @@ TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Groundskeeper 已生成！不要踩踏草坪！", 3)
+Library:Notify("Groundskeeper 已生成！不要踩踏草坪", 3)
 Sound()
 end
 end
@@ -4011,7 +3847,7 @@ if OptionNotify == "Doors" then
 Achievement({
 Title = "Monument",
 Desc = "Monument 已生成",
-Reason = "看着它",
+Reason = "看着点",
 Image = "rbxassetid://88933556873017",
 Text = "WARNING",
 TextColor = Color3.fromRGB(255, 0, 0),
@@ -4034,7 +3870,7 @@ TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Seek 已生成！下一门有Seek！", 3)
+Library:Notify("Seek 已生成！下一门有Seek战", 3)
 Sound()
 end
 end
@@ -4059,7 +3895,7 @@ TextColor = Color3.fromRGB(255, 0, 0),
 UIStrokeColor = Color3.fromRGB(255, 0, 0)
 })
 else
-Library:Notify("Groundskeeper 已生成！不要踩踏草坪！", 3)
+Library:Notify("Groundskeeper 已生成！不要踩踏草坪", 3)
 Sound()
 end
 end
@@ -4068,103 +3904,9 @@ end
 end
 end))
 
-NotifyBox:AddToggle('AutoCodeNotify', {
+NotifyBox:AddToggle('NotifyLibraryCode', {
     Text = "通知挂锁密码",
-    Default = false,
-    Tooltip = "将密码显示为通知",
-Callback = function(on)
-if on then
-while game:GetService("ReplicatedStorage").GameData.LatestRoom.Value < 50 do
-task.wait(0.4)
-if not Toggles.AutoCodeNotify.Value then return end
-end
-local seenPapers = {}
-local lastCodes = {}
-local function parsePaper(paper, hintsContainer)
-local children = paper:WaitForChild("UI"):GetChildren()
-local map, order = {}, {}
-for i = 1, #children do
-local c = children[i]
-local idx = tonumber(c.Name)
-if idx then
-local key = c.ImageRectOffset.X .. "_" .. c.ImageRectOffset.Y
-map[key] = { idx, "" }
-order[idx] = key
-end
-end
-if hintsContainer then
-for _, ic in ipairs(hintsContainer:GetChildren()) do
-if ic.Name == "Icon" then
-local key = ic.ImageRectOffset.X .. "_" .. ic.ImageRectOffset.Y
-local entry = map[key]
-if entry then
-local lbl = ic:FindFirstChildWhichIsA("TextLabel")
-if lbl then 
-entry[2] = lbl.Text 
-end
-end
-end
-end
-end
-local parts = {}
-for i = 1, #order do
-parts[i] = map[order[i]][2]
-end
-return table.concat(parts)
-end
-local function handleCode(paper)
-local hints = LocalPlayer.PlayerGui:FindFirstChild("PermUI") and 
-LocalPlayer.PlayerGui.PermUI:FindFirstChild("Hints")
-local code = parsePaper(paper, hints)
-if lastCodes[paper] ~= code and code ~= "" then
-lastCodes[paper] = code
-Library:Notify("挂锁密码是 "..code, 3)
-end
-end
-local function addPaper(paper)
-if seenPapers[paper] then return end
-seenPapers[paper] = true
-local descAddedConn = paper.DescendantAdded:Connect(function()
-handleCode(paper)
-end)
-local descRemovingConn = paper.DescendantRemoving:Connect(function()
-handleCode(paper)
-end)
-handleCode(paper)
-table.insert(Connections, descAddedConn)
-table.insert(Connections, descRemovingConn)
-end
-local function removePaper(paper)
-seenPapers[paper] = nil
-lastCodes[paper] = nil
-end
-local function scanContainer(container)
-for _, obj in ipairs(container:GetChildren()) do
-if obj.Name == "LibraryHintPaper" or obj.Name == "LibraryHintPaperHard" then
-addPaper(obj)
-end
-end
-end
-scanContainer(LocalPlayer.Character)
-scanContainer(LocalPlayer.Backpack)
-local backpackAddedConn = LocalPlayer.Backpack.ChildAdded:Connect(function(obj)
-if obj.Name == "LibraryHintPaper" or obj.Name == "LibraryHintPaperHard" then
-addPaper(obj)
-end
-end)
-local backpackRemovedConn = LocalPlayer.Backpack.ChildRemoved:Connect(function(obj)
-removePaper(obj)
-end)
-table.insert(Connections, backpackAddedConn)
-table.insert(Connections, backpackRemovedConn)
-local characterAddedConn = LocalPlayer.CharacterAdded:Connect(function(char)
-task.wait(1)
-scanContainer(char)
-end)
-table.insert(Connections, characterAddedConn)
-else
-end
-end
+    Default = false
 })
 
 local oxygenNotifyRunning = false
@@ -4419,6 +4161,7 @@ end
 end
 })
 
+if ReplicatedStorage:FindFirstChild("RemotesFolder") then
 local hidingTimeConnection = nil
 local hideMonsterHook = nil
 local hidingAttributeConnection = nil
@@ -4442,8 +4185,8 @@ if hidingNotification then
 hidingNotification:Destroy()
 end
 hidingNotification = Library:Notify({
-Title = "玩家躲藏中...",
-Description = "躲藏剩余时间: " .. hideDuration .. "秒",
+Title = "玩家躲藏点...",
+Description = "躲藏剩余时间: " .. hideDuration .. "",
 Persist = true,
 })
 end
@@ -4459,8 +4202,8 @@ local elapsedTime = currentTime - hidingStartTime
 local remainingTime = math.max(0, currentHideDuration - elapsedTime)
 local formattedTime = string.format("%.1f", remainingTime)
 if hidingNotification then
-hidingNotification:ChangeTitle("玩家躲藏中...")
-hidingNotification:ChangeDescription("躲藏剩余时间: " .. formattedTime .. "秒")
+hidingNotification:ChangeTitle("玩家躲藏点...")
+hidingNotification:ChangeDescription("躲藏剩余时间: " .. formattedTime .. "")
 end
 if remainingTime <= 0 then
 if hidingNotification then
@@ -4514,6 +4257,7 @@ currentHideDuration = nil
 end
 end
 })
+end
 
 Ambient:AddToggle('Fullbright', {
     Text = "全亮",
@@ -4530,7 +4274,7 @@ local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local skyRemovalConnection = nil
 Ambient:AddToggle('AntiFog', {
-    Text = "没有雾",
+    Text = "没有门",
     Default = false,
 Callback = function(Value)
 if Value then
@@ -4556,7 +4300,7 @@ end
 })
 
 Ambient:AddToggle('AntiLag',{
-     Text = "防卡顿",
+     Text = "防卡墙",
      Default = false,
 Callback = function(Value)
 if Value then
@@ -4884,7 +4628,7 @@ end,
 })
 
 Effect:AddToggle('AntiJumpscares', {
-    Text = "无跳杀",
+    Text = "无跳脸",
     Default = false,
 Callback = function(Value)
 local JumpscaresModule = RemoteListener:FindFirstChild("Jumpscares") or RemoteListener:FindFirstChild("_Jumpscares")
@@ -4903,14 +4647,24 @@ local CutScenes = RemoteListener:FindFirstChild("Cutscenes") or RemoteListener:F
 CutScenes.Name = Value and "_Cutscenes" or "Cutscenes"
 end)
 
-Effect:AddToggle('AntiSpider', {
-    Text = "无蜘蛛跳脸",
-    Default = false,
+Effect:AddToggle('AntiSpider',{
+     Text = "无蜘蛛跳脸",
+     Default = false,
 Callback = function(Value)
-local SpiderModule = ClientModules.EntityModules:FindFirstChild("SpiderJumpscare") or 
-ClientModules.EntityModules:FindFirstChild("_SpiderJumpscare")
+local SpiderModule = Modules:FindFirstChild("SpiderJumpscare") or Modules:FindFirstChild("_SpiderJumpscare")
 if SpiderModule then
 SpiderModule.Name = Value and "_SpiderJumpscare" or "SpiderJumpscare"
+end
+end
+})
+
+Effect:AddToggle('AntiGlitch',{
+     Text = "无故障跳脸",
+     Default = false,
+     Callback = function(Value)
+local GlitchModule = ClientModules.EntityModules:FindFirstChild("Glitch") or ClientModules.EntityModules:FindFirstChild("_Glitch")
+if GlitchModule then
+GlitchModule.Name = Value and "_Glitch" or "Glitch"
 end
 end
 })
@@ -4919,24 +4673,16 @@ Effect:AddToggle('AntiVoid', {
     Text = "无虚空跳脸",
     Default = false,
 Callback = function(Value)
+local VoidModule = ClientModules.EntityModules:FindFirstChild("Void") or ClientModules.EntityModules:FindFirstChild("_Void")
 if VoidModule then
-if Value then
-if not VoidModule.originalStuff then
-VoidModule.originalStuff = VoidModule.stuff
-end
-VoidModule.stuff = function() end
-else
-if VoidModule.originalStuff then
-VoidModule.stuff = VoidModule.originalStuff
-end
-end
+VoidModule.Name = Value and "_Void" or "Void"
 end
 end
 })
 
 local batDecorConnection = nil
 Effect:AddToggle('NoBatDecor', {
-    Text = "无蝙蝠装饰",
+    Text = "无蝙蝠伤害",
     Default = false,
 Callback = function(Value)
 if Value then
@@ -4964,7 +4710,7 @@ end
 })
 
 Effect:AddToggle('NoVignette', {
-    Text = "柜子无暗角",
+    Text = "柜子无暗影",
     Default = false
 })
 local noVignetteLoop = nil
@@ -5043,6 +4789,7 @@ end
 end
 })
 
+if ReplicatedStorage:FindFirstChild("RemotesFolder") then
 local FakeSurge = Instance.new("RemoteEvent", ReplicatedStorage)
 FakeSurge.Name = "SurgeRemote"
 FloorAnti:AddToggle('AntiSurge', {
@@ -5059,7 +4806,68 @@ end
 end
 })
 
-if Floor.Value == "Hotel" then
+local antiMonumentConnection = nil
+FloorAnti:AddToggle('AntiMonument', {
+    Text = "防 Monument",
+    Default = false,
+Callback = function(Value)
+if Value then
+if antiMonumentConnection then
+antiMonumentConnection:Disconnect()
+for i, conn in ipairs(Connections) do
+if conn == antiMonumentConnection then
+table.remove(Connections, i)
+break
+end
+end
+end
+antiMonumentConnection = RunService.RenderStepped:Connect(function()
+if not Toggles.AntiMonument.Value then return end
+local char = LocalPlayer.Character
+if not char then return end
+local root = char:FindFirstChild("HumanoidRootPart")
+if not root then return end
+local camPos = root.Position
+local closestMonument = nil
+local closestDist = math.huge
+for _, obj in ipairs(workspace:GetChildren()) do
+if obj.Name == "MonumentEntity" and obj:IsA("Model") then
+local top = obj:FindFirstChild("Top")
+if top and top:IsA("Model") then
+local topPos = top:GetPivot().Position
+local dist = (topPos - camPos).Magnitude
+if dist < closestDist then
+closestDist = dist
+closestMonument = topPos
+end
+end
+end
+end
+if closestMonument then
+local lookDir = (closestMonument - root.Position).Unit
+local flatDir = Vector3.new(lookDir.X, 0, lookDir.Z).Unit
+local targetCF = CFrame.new(root.Position, root.Position + flatDir)
+root.CFrame = targetCF
+end
+end)
+table.insert(Connections, antiMonumentConnection)
+else
+if antiMonumentConnection then
+antiMonumentConnection:Disconnect()
+for i, conn in ipairs(Connections) do
+if conn == antiMonumentConnection then
+table.remove(Connections, i)
+break
+end
+end
+antiMonumentConnection = nil
+end
+end
+end
+})
+end
+
+if Floor.Value == "Fools" then
 local noPuzzleDoorsRunning = false
 local noPuzzleDoorsConnection = nil
 FloorAnti:AddToggle('NoPuzzleDoors', {
@@ -5216,9 +5024,73 @@ performMinecartRename()
 end
 end
 
+local minecartTeleportEnabled = false
+local minecartTeleportConnection = nil
+local hasNotifiedReady = false
+local hasNotifiedStart = false
+local hasNotifiedEnd = false
+FloorAnti:AddToggle('MinecartTeleport', {
+    Text = "矿车传送",
+    Tooltip = "不是真的矿车传�，但是比真的更快",
+    Default = false,
+Callback = function(Value)
+if Value then
+hasNotifiedReady = false
+hasNotifiedStart = false
+hasNotifiedEnd = false
+minecartTeleportEnabled = true
+minecartTeleportConnection = RunService.Heartbeat:Connect(function()
+if not minecartTeleportEnabled then return end
+if not Toggles.DeleteMinecart.Value then
+Toggles.DeleteMinecart:SetValue(true)
+end
+local char = LocalPlayer.Character
+if not char then return end
+local latestRoom = ReplicatedStorage.GameData.LatestRoom.Value
+if latestRoom == 44 and not hasNotifiedReady then
+Library:Notify("矿车传�已准就绪！等待过场动画...",10)
+hasNotifiedReady = true
+end
+local minecarting = char:GetAttribute("Minecarting")
+if not minecarting then
+return
+end
+if latestRoom >= 50 then
+if not hasNotifiedEnd then
+Library:Notify("矿车传送已结束",3)
+hasNotifiedEnd = true
+end
+return
+end
+local room = workspace.CurrentRooms:FindFirstChild(tostring(latestRoom))
+if not room then return end
+local door = room:FindFirstChild("Door")
+if not door then return end
+local doorPart = door:FindFirstChild("Door")
+if not doorPart then return end
+local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
+if not humanoidRootPart then return end
+local teleportCF = doorPart.CFrame * CFrame.new(0, 0, -3)
+humanoidRootPart.CFrame = teleportCF
+if not hasNotifiedStart then
+Library:Notify("矿车传�开始工作，祝你旅�愉��",3)
+hasNotifiedStart = true
+end
+end)
+table.insert(Connections, minecartTeleportConnection)
+else
+minecartTeleportEnabled = false
+if minecartTeleportConnection then
+minecartTeleportConnection:Disconnect()
+minecartTeleportConnection = nil
+end
+end
+end
+})
+
 local minecartConnection = nil
 FloorAnti:AddToggle('MinecartNoCollision', {
-Text = "矿车无碰撞",
+Text = "矿车无伤害",
 Default = false,
 Callback = function(Value)
 if Value then
@@ -5281,7 +5153,7 @@ if not Value then
 RemoteFolder.ClimbLadder:FireServer()
 end
 if Value then
-Library:Notify("爬上梯子绕过反作弊",9)
+Library:Notify("自动绕过反作弊",9)
 end
 end)
 LocalPlayer.Character:GetAttributeChangedSignal("Climbing"):Connect(function()
@@ -5325,7 +5197,7 @@ end)
 table.insert(bridgeConns, conn)
 end
 FloorAnti:AddToggle("ABF", {
-Text = "防止桥坠毁",
+Text = "防断桥坠落",
 Default = false,
 Callback = function(on)
 for _, c in ipairs(bridgeConns) do c:Disconnect() end
@@ -5374,7 +5246,7 @@ end
 })
 
 FloorAnti:AddToggle('AntiSeekFlood', {
-    Text = "防 Seek 洪水",
+    Text = "防 Seek ��",
     Default = false,
 Callback = function(Value)
 local SeekSlopRemote = game:GetService("ReplicatedStorage").RemotesFolder:FindFirstChild("SeekSlop")
@@ -5400,9 +5272,160 @@ end
 })
 end
 
+if Floor.Value == "Fools" then
+FloorAnti:AddDivider()
+
+Options.FlySpeed:SetMax(100)
+Options.SpeedBoostSlider:SetMax(100)
+
+FloorAnti:AddToggle('Godmode',{
+Text = "上帝模式",
+Default = false,
+Callback = function(Value)
+if Value then
+if not Toggles.Noclip.Value then
+Toggles.Noclip:SetValue(true)
+end
+LocalPlayer.Character.Collision.Position = LocalPlayer.Character.Collision.Position - Vector3.new(0, 11, 0)
+else
+LocalPlayer.Character.Collision.Position = LocalPlayer.Character.Collision.Position + Vector3.new(0, 11, 0)
+end
+end
+}):AddKeyPicker('Godmode Keybind', {
+    Default = 'G', 
+    SyncToggleState = true,
+    Mode = 'Toggle',
+    Text = '上帝模式',
+    NoUI = false,
+    Callback = function(Value) end,
+    ChangedCallback = function(New) end
+})
+
+FloorAnti:AddToggle('FigureGodmode',{
+Text = "飞哥上帝模式",
+Default = false,
+Callback = function(Value)
+end
+})
+
+FloorAnti:AddToggle('AntiBanana',{
+Text = "防卡死",
+Default = false,
+Callback = function(Value)
+for _, v in ipairs(workspace:GetChildren()) do
+if v.Name == "BananaPeel" then
+setcantouch(v, not Value)
+end
+end
+end
+})
+
+FloorAnti:AddToggle('DeleteSeek',{
+Text = "删除Seek",
+Default = false
+})
+task.spawn(function()
+while task.wait(0.09) do
+if Library.Unloaded then break end
+if Toggles.DeleteSeek.Value then
+local SeekCollision = workspace:FindFirstChild("TriggerEventCollision",true)
+local Trigger = workspace:FindFirstChild("TriggerSeek",true)
+if Trigger then
+Trigger:Destroy()
+end
+if SeekCollision then
+SeekCollision:ClearAllChildren()
+end
+end
+end
+end)
+
+FloorAnti:AddToggle('InfiniteRevive', {
+    Text = "无限复活",
+    Default = false,
+    Callback = function(Value)
+if Value then
+local RS = game:GetService("ReplicatedStorage")
+local Bricks = RS:FindFirstChild("Bricks")
+local EntityInfo = RS:FindFirstChild("EntityInfo")
+local function setupRevive(char)
+local hum = char:WaitForChild("Humanoid")
+hum.Died:Connect(function()
+if Toggles.InfiniteRevive.Value then
+if EntityInfo then
+EntityInfo.Revive:FireServer()
+elseif Bricks then
+Bricks:FireServer()
+end
+task.wait(0.5)
+if Toggles.InfiniteRevive.Value then
+setupRevive(LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait())
+end
+end
+end)
+end
+local charAddedConn = LocalPlayer.CharacterAdded:Connect(function(char)
+if Toggles.InfiniteRevive.Value then
+setupRevive(char)
+end
+end)
+table.insert(Connections, charAddedConn)
+if LocalPlayer.Character then
+setupRevive(LocalPlayer.Character)
+end
+end
+end
+})
+end
+
+if Floor.Value == "Retro" then
+FloorAnti:AddToggle("AntiLava", {
+	Text = "防 Lava",
+	Default = false,
+	Callback = function(Value)
+for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
+if v.Name == "Lava" then
+v.CanTouch = false
+end
+end
+end
+})
+
+FloorAnti:AddToggle("AntiScaryWall", {
+	Text = "防 ScaryWall",
+	Default = false,
+	Callback = function(Value)
+for _, v in pairs(workspace.CurrentRooms:GetDescendants()) do
+if v.Name == "ScaryWall" then
+for _, part in pairs(v:GetChildren()) do
+if part:IsA("BasePart") then
+part.CanTouch = false
+end
+end
+end
+end
+end
+})
+workspace.DescendantAdded:Connect(function(inst)
+local name = inst.Name
+local parent = inst.Parent
+if name == "Lava" then
+inst.CanTouch = not Toggles.AntiLava.Value
+end
+if name == "ScaryWall" then
+task.wait()
+for _, p in ipairs(inst:GetChildren()) do
+if p:IsA("BasePart") then
+p.CanTouch = not Toggles.AntiScaryWall.Value
+end
+end
+end
+end)
+end
+
 local MaxSlopeAngle = 45
 Other:AddSlider("MaxSlopeAngleSlider", {
-    Text = "最大斜坡角度",
+    Text = "防大斜坡伤害",
     Default = 45,
     Min = 0,
     Max = 90,
@@ -5431,6 +5454,95 @@ end)
 Other:AddDivider()
 
 if Floor.Value == "Mines" then
+autoAnchorRunning = false
+autoAnchorConnection = nil
+lastCheck = 0
+checkInterval = 0.5
+cachedAnchors = {}
+local function updateAnchorCache()
+cachedAnchors = {}
+room50 = workspace.CurrentRooms:FindFirstChild("50")
+if not room50 then 
+for roomName, room in pairs(workspace.CurrentRooms:GetChildren()) do
+if tonumber(roomName) and tonumber(roomName) >= 50 then
+room50 = room
+break
+end
+end
+end
+if room50 then
+for _, anchor in ipairs(room50:GetDescendants()) do
+if anchor.Name == "MinesAnchor" then
+table.insert(cachedAnchors, anchor)
+end
+end
+end
+end
+local function solveAnchor()
+if not autoAnchorRunning then return end
+playerGui = LocalPlayer:WaitForChild("PlayerGui")
+mainUI = playerGui:WaitForChild("MainUI")
+AnchorHintFrame = mainUI:FindFirstChild("AnchorHintFrame")
+if not AnchorHintFrame then return end
+anchorSignText = AnchorHintFrame:FindFirstChild("AnchorCode")
+currentCode = AnchorHintFrame:FindFirstChild("Code")
+if not anchorSignText or not currentCode then return end
+signText = anchorSignText.Text
+codeText = currentCode.Text
+if signText == "" or codeText == "" then return end
+playerPosition = LocalPlayer.Character and 
+LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and 
+LocalPlayer.Character.HumanoidRootPart.Position
+if not playerPosition then return end
+for _, anchor in ipairs(cachedAnchors) do
+if not autoAnchorRunning then break end
+sign = anchor:FindFirstChild("Sign")
+if sign then
+textLabel = sign:FindFirstChild("TextLabel")
+if textLabel and textLabel.Text == signText then
+anchorPosition = anchor.PrimaryPart and anchor.PrimaryPart.Position or
+(anchor:FindFirstChildWhichIsA("BasePart") and anchor:FindFirstChildWhichIsA("BasePart").Position)
+if anchorPosition then
+distance = (playerPosition - anchorPosition).Magnitude
+if distance < 12 then
+anchorRemote = anchor:FindFirstChild("AnchorRemote")
+if anchorRemote then
+pcall(function()
+anchorRemote:InvokeServer(codeText)
+end)
+end
+break
+end
+end
+end
+end
+end
+end
+Other:AddToggle('AutoAnchorSolver', {
+    Text = "自动密码锁",
+    Default = false,
+Callback = function(Value)
+if Value then
+autoAnchorRunning = true
+updateAnchorCache()
+autoAnchorConnection = game:GetService("RunService").Heartbeat:Connect(function()
+if not autoAnchorRunning then return end
+now = tick()
+if now - lastCheck >= checkInterval then
+lastCheck = now
+solveAnchor()
+end
+end)
+else
+autoAnchorRunning = false
+if autoAnchorConnection then
+autoAnchorConnection:Disconnect()
+autoAnchorConnection = nil
+end
+end
+end
+})
+
 local SeekPathColor = Color3.new(0, 1, 0)
 local SeekPathThickness = 0.2
 local seekPathLines = {}
@@ -5483,7 +5595,7 @@ seekPathUpdateConnection = nil
 end
 end
 Other:AddToggle("ShowSeekPath", {
-Text = "显示追逐战路径",
+Text = "显示追�战��",
 Default = false,
 Callback = function(Value)
 if Value then
@@ -5499,7 +5611,7 @@ end
 end
 }):AddColorPicker('SeekPathColorPicker', {
 Default = SeekPathColor,
-Title = '路径颜色',
+Title = '��颜色',
 Transparency = 0,
 Callback = function(Value)
 SeekPathColor = Value
@@ -5536,7 +5648,7 @@ end
 })
 
 ModifiersBox:AddToggle('AntiLookman', {
-    Text = "防 Lookman",
+    Text = " Lookman",
     Default = false
 })
 
@@ -5600,12 +5712,10 @@ end
 end
 end
 })
-table.insert(Connections, RunService.Heartbeat:Connect(function(dt)
+table.insert(Connections,workspace.DescendantAdded:Connect(function(v)
 if Toggles.AntiGloomPile and Toggles.AntiGloomPile.Value then
-for _, v in ipairs(workspace.CurrentRooms:GetDescendants()) do
-if v.Name == "GloomEgg" then
-v:WaitForChild("Egg", 9e9).CanTouch = false
-end
+if v.Name == "Egg" then
+v.CanTouch = false
 end
 end
 end))
@@ -5627,12 +5737,24 @@ end
 end
 })
 
+ModifiersBox:AddToggle('AntiJeff',{
+Text = "防杀手杰克",
+Default = false,
+Callback = function(Value)
+for _, v in ipairs(workspace:GetChildren()) do
+if v.Name == "JeffTheKiller" then
+setcantouch(v, not Value)
+end
+end
+end
+})
+
 Farm:AddButton({
     Text = "死亡农场",
     DoubleClick = true,
 Func = function()
 if not replicatesignal or not queue_on_teleport then
-Library:Notify("你的执行器不支持复制信号", 3)
+Library:Notify("你的执器不��复制信号", 3)
 return 
 end
 if queue_on_teleport then
@@ -5673,12 +5795,118 @@ end
 end
 })
 
+ModuleBox:AddToggle('FreeMouse',{
+     Text = "解锁鼠标",
+     Default = false,
+Callback = function(Value)
+if Value then
+RequiredMainGame.freemouse = true
+else
+RequiredMainGame.freemouse = false
+end
+end
+})
+
+ModuleBox:AddToggle('DisableMovement',{
+     Text = "禁用移动",
+     Default = false,
+Callback = function(Value)
+if Value then
+RequiredMainGame.disableMovement = true
+else
+RequiredMainGame.disableMovement = false
+end
+end
+})
+
+ModuleBox:AddToggle('Stunned',{
+     Text = "模块眩晕",
+     Default = false,
+Callback = function(Value)
+if Value then
+RequiredMainGame.stunned = true
+else
+RequiredMainGame.stunned = false
+end
+end
+})
+
+ModuleBox:AddToggle('StopCam',{
+     Text = "停止相机",
+     Default = false,
+Callback = function(Value)
+if Value then
+RequiredMainGame.stopcam = true
+else
+RequiredMainGame.stopcam = false
+end
+end
+})
+
+AdminPanel:AddButton({
+    Text = "生成 Surge",
+Func = function()
+game:GetService("ReplicatedStorage").RemotesFolder.AdminPanelRunCommand:FireServer("Surge", {})
+end
+})
+
+AdminPanel:AddButton({
+    Text = "生成 Bramble",
+Func = function()
+game:GetService("ReplicatedStorage").RemotesFolder.AdminPanelRunCommand:FireServer("Bramble", {})
+end
+})
+
+AdminPanel:AddButton({
+    Text = "生成 Groundskeeper",
+Func = function()
+game:GetService("ReplicatedStorage").RemotesFolder.AdminPanelRunCommand:FireServer("Groundskeeper", {})
+end
+})
+
+AdminPanel:AddButton({
+    Text = "获取开发者选项",
+    DoubleClick = true,
+Func = function()
+for i = 1, 5 do
+queue_on_teleport([[
+game:GetService("RunService").Heartbeat:Connect(function()
+game.Players.LocalPlayer:SetAttribute("ServerAdmin", 5)
+end)
+]])
+end
+Library:Notify("正在重进服务器，请等待...",10)
+RemoteFolder.PlayAgain:FireServer()
+end
+})
+
 table.insert(Connections,RunService.RenderStepped:Connect(function()
 alive = LocalPlayer:GetAttribute("Alive")
 if alive then
 
 if Toggles.Fullbright.Value then
 Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+end
+
+if LocalPlayer:GetAttribute("FakeDeath") == true then
+latestRoom = ReplicatedStorage.GameData.LatestRoom.Value
+LocalPlayer:SetAttribute("CurrentRoom", latestRoom)
+for _, v in ipairs(workspace.CurrentRooms:GetDescendants()) do
+if v:IsA("ProximityPrompt") then
+v.Style = Enum.ProximityPromptStyle.Default
+end
+end
+end
+
+if Toggles.FigureGodmode then
+local Figure = workspace:FindFirstChild("FigureRagdoll", true)
+if Figure then
+for _, v in Figure:GetChildren() do
+if v:IsA("BasePart") then
+v.CanTouch = not Toggles.FigureGodmode.Value
+end
+end
+end
 end
 
 if Toggles.NoCutscenes.Value then
@@ -5693,7 +5921,7 @@ RemoteFolder.MotorReplication:FireServer(-890)
 end
 end
 
-if Options.GMDropdown and Options.GMDropdown.Value == "自动" then
+if Options.GMDropdown and Options.GMDropdown.Value == "��" then
 local Entitys = workspace:FindFirstChild("RushMoving") or 
 workspace:FindFirstChild("AmbushMoving") or 
 workspace:FindFirstChild("GlitchRush") or 
@@ -5754,11 +5982,13 @@ end
 end
 
 if Toggles.AntiEyes.Value then
+if alive then
 if Workspace:FindFirstChild("Eyes") then
 if RemoteFolder.Name == "Bricks" or RemoteFolder.Name == "EntityInfo" then
 RemoteFolder.MotorReplication:FireServer(0, -100, 0, false)
 else
 RemoteFolder.MotorReplication:FireServer(-890)
+end
 end
 end
 end
@@ -5896,7 +6126,9 @@ Base = prompt.Parent.Parent:FindFirstChildOfClass("BasePart")
 end
 end
 if Base and (LocalPlayer.Character.HumanoidRootPart.Position - Base.Position).Magnitude < prompt.MaxActivationDistance then
+local Skip = false
 if not (isMinesGateButton or isFusesPrompt) then
+if not Skip then
 local isTrickOrTreat = false
 if prompt.Name == "ActivateEventPrompt" then
 local parent = prompt.Parent
@@ -5908,42 +6140,45 @@ end
 end
 end
 if isTrickOrTreat then
-return
-end
-if prompt.Parent and prompt.Parent.Name == "GlitchCube" and Options.IgnoreList and Options.IgnoreList.Value["故障方块"] then
-return
-end
-if prompt.Parent and prompt.Parent.Name == "GoldPile" and Options.IgnoreList and Options.IgnoreList.Value["金币"] then 
-return 
-end
-if prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Candy" and Options.IgnoreList and Options.IgnoreList.Value["糖果"] then
-return
-end
-if prompt.Parent:GetAttribute("JeffShop") and Options.IgnoreList and Options.IgnoreList.Value["Jeff物品"] then 
-return 
-end
-if prompt.Parent.Parent and prompt.Parent.Parent.Name == "Drops" and Options.IgnoreList and Options.IgnoreList.Value["丢弃物品"] then 
-return 
-end
-if prompt.Parent and prompt.Parent.Name == "Candy" and prompt.Parent:GetAttribute("Tool_CandyID") == "CandyRed" and Options.IgnoreList and Options.IgnoreList.Value["死亡糖果"] then
-return
-end
-if prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Hole" then 
-return 
-end
-if prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Mandrake" then 
-return 
-end
-if prompt.Parent and prompt.Parent.Name == "Padlock" then 
-return 
-end
-if prompt.Parent and prompt.Parent.Name == "KeyObtainFake" then 
-return 
+Skip = true
 end
 end
+if not Skip and prompt.Parent and prompt.Parent.Name == "GlitchCube" and Options.IgnoreList and Options.IgnoreList.Value["故障方块"] then
+Skip = true
+end
+if not Skip and prompt.Parent and prompt.Parent.Name == "GoldPile" and Options.IgnoreList and Options.IgnoreList.Value["金币"] then 
+Skip = true
+end
+if not Skip and prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Candy" and Options.IgnoreList and Options.IgnoreList.Value["糖果"] then
+Skip = true
+end
+if not Skip and prompt.Parent:GetAttribute("JeffShop") and Options.IgnoreList and Options.IgnoreList.Value["Jeff物品"] then 
+Skip = true
+end
+if not Skip and prompt.Parent.Parent and prompt.Parent.Parent.Name == "Drops" and Options.IgnoreList and Options.IgnoreList.Value["丢弃物品"] then 
+Skip = true
+end
+if not Skip and prompt.Parent and prompt.Parent.Name == "Candy" and prompt.Parent:GetAttribute("Tool_CandyID") == "CandyRed" and Options.IgnoreList and Options.IgnoreList.Value["死亡糖果"] then
+Skip = true
+end
+if not Skip and prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Hole" then 
+Skip = true
+end
+if not Skip and prompt.Name == "ModulePrompt" and prompt.Parent and prompt.Parent.Name == "Mandrake" then 
+Skip = true
+end
+if not Skip and prompt.Parent and prompt.Parent.Name == "Padlock" then 
+Skip = true
+end
+if not Skip and prompt.Parent and prompt.Parent.Name == "KeyObtainFake" then 
+Skip = true
+end
+end
+if not Skip then
 if prompt.ClickablePrompt then
 if prompt:IsA("ProximityPrompt") then
 fireproximityprompt(prompt)
+end
 end
 end
 end
@@ -5955,6 +6190,21 @@ end
 end
 end))
 
+workspace.ChildAdded:Connect(function(v)
+if v.Name == "BananaPeel" then
+setcantouch(v, not Toggles.AntiBanana.Value)
+end
+if v.Name == "JeffTheKiller" then
+v.ChildAdded:Connect(function()
+for _, part in v:GetChildren() do
+if part:IsA("BasePart") then
+part.CanTouch = not Toggles.AntiJeff.Value 
+end
+end
+end)
+setcantouch(v,  not Toggles.AntiJeff.Value)
+end
+end)
 
 table.insert(Connections, workspace.DescendantAdded:Connect(function(v)
 local Delay = math.random(200, 270) / 1000
@@ -6053,18 +6303,14 @@ v:WaitForChild("Hitbox").CanTouch = false
 end
 end
 
+
 if AutoLibraryCodeConnection then
 AutoLibraryCodeConnection:Disconnect()
 AutoLibraryCodeConnection = nil
 end
 
-LocalPlayer:SetAttribute("SapphireLoaded", nil)
+LocalPlayer:SetAttribute("NectarLoaded", nil)
 
-if autoGlitchConnection then
-autoGlitchConnection:Disconnect()
-autoGlitchConnection = nil
-end
-autoGlitchEnabled = false
 if Toggles.AutoGlitch and Toggles.AutoGlitch.Value then
 Toggles.AutoGlitch:SetValue(false)
 end
@@ -6117,6 +6363,10 @@ pcall(function() RunService:UnbindFromRenderStep("THIRD_PERSON_SYS") end)
 
 pcall(function() RunService:UnbindFromRenderStep("FOV_SYS") end)
 
+if Toggles.GodMode and Toggles.GodMode.Value then
+Toggles.GodMode:SetValue(false)
+end
+
 if batDecorConnection then
 batDecorConnection:Disconnect()
 batDecorConnection = nil
@@ -6167,15 +6417,16 @@ task.cancel(AnticheatManipulationLoop)
 AnticheatManipulationLoop = nil
 end
 
-for _, espObjects in pairs({DoorESPObjects, TaskESPObjects, HidingSpotESPObjects, 
-ChestESPObjects, PlayerESPObjects, GoldESPObjects, 
-ItemsESPObjects, StardustESPObjects, EntityESPObjects}) do
-for _, espObject in pairs(espObjects) do
-if espObject and espObject.Destroy then
-pcall(function() espObject:Destroy() end)
-end
-end
-end
+stopDoorESP()
+stopTaskESP()
+stopHidingSpotESP()
+stopChestESP()
+stopPlayerESP()
+stopGoldESP()
+stopItemsESP()
+stopStardustESP()
+stopEntitiesESP()
+stopLadderESP()
 
 Library:Unload()
 if ESPLibrary then
@@ -6217,24 +6468,114 @@ end
 
 end
 
-SettingsBox:AddLabel("菜单"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "快捷菜单" })
+SettingsBox:AddLabel("菜单"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "辅助菜单" })
 
 Library.ToggleKeybind = Options.MenuKeybind 
 SettingsBox:AddToggle("ShowKeybinds", {
-Text = "显示快捷键",
+Text = "显示躲藏点",
 Default = false,
-Tooltip = "显示快捷键菜单",
+Tooltip = "显示躲藏点��",
 }):OnChanged(function()
 Library.KeybindFrame.Visible = Toggles.ShowKeybinds.Value
 end)
 
 SettingsBox:AddToggle("ShowCustomCursor", {
-Text = "显示自定义光标",
+Text = "显示自定义光源",
 Default = Library.IsMobile == true and true or false,
 Tooltip = "切换光标的可见性",
 }):OnChanged(function()
 Library.ShowCustomCursor = Toggles.ShowCustomCursor.Value
 end)
+
+SettingsBox:AddToggle("RainbowAccent", {
+    Text = "彩色主题",
+    Default = false,
+Callback = function(value)
+if value then
+if UIStyle == "Linoria" then
+originalAccentColor = Library.AccentColor
+else
+originalAccentColor = Library.Scheme.AccentColor
+end
+rainbowConnection = RunService.RenderStepped:Connect(function()
+local hue = (tick() % 5) / 5
+local newColor = Color3.fromHSV(hue, 1, 1)
+if UIStyle == "Linoria" then
+Library.AccentColor = newColor
+else
+Library.Scheme.AccentColor = newColor
+end
+Library:UpdateColorsUsingRegistry()
+end)
+table.insert(Connections, rainbowConnection)
+else
+if rainbowConnection then
+rainbowConnection:Disconnect()
+rainbowConnection = nil
+end
+if originalAccentColor then
+if UIStyle == "Linoria" then
+Library.AccentColor = originalAccentColor
+else
+Library.Scheme.AccentColor = originalAccentColor
+end
+Library:UpdateColorsUsingRegistry()
+originalAccentColor = nil
+end
+end
+end
+})
+
+SettingsBox:AddToggle("RainbowFont", {
+    Text = "彩色字体",
+    Default = false,
+Callback = function(value)
+if value then
+if UIStyle == "Linoria" then
+originalFontColor = Library.FontColor
+else
+originalFontColor = Library.Scheme.FontColor
+end
+rainbowFontConnection = RunService.RenderStepped:Connect(function()
+local hue = (tick() % 5) / 5
+local newColor = Color3.fromHSV(hue, 1, 1)
+if UIStyle == "Linoria" then
+Library.FontColor = newColor
+else
+Library.Scheme.FontColor = newColor
+end
+Library:UpdateColorsUsingRegistry()
+end)
+table.insert(Connections, rainbowFontConnection)
+else
+if rainbowFontConnection then
+rainbowFontConnection:Disconnect()
+rainbowFontConnection = nil
+end
+if originalFontColor then
+if UIStyle == "Linoria" then
+Library.FontColor = originalFontColor
+else
+Library.Scheme.FontColor = originalFontColor
+end
+Library:UpdateColorsUsingRegistry()
+originalFontColor = nil
+end
+end
+end
+})
+
+SettingsBox:AddDropdown("UIStyleSelector", {
+    Values = {"Obsidian", "Linoria"},
+    Default = savedUIStyle,
+    Text = "UI样式",
+Callback = function(Value)
+if writefile then
+pcall(writefile, UIStyleFile, Value)
+Library:Notify("重启脚本后生效", 3)
+end
+end
+})
 
 SettingsBox:AddDropdown("DPIDropdown", {
     Values = { "50%", "75%", "100%", "125%", "150%", "175%", "200%" },
@@ -6246,6 +6587,7 @@ local DPI = tonumber(Value)
 Library:SetDPIScale(DPI)
 end,
 })
+SettingsBox:AddDivider()
 
 SettingsBox:AddButton({
      Text = "卸载脚本",
@@ -6254,19 +6596,8 @@ Unload()
 end
 })
 
-local hubFolder = "Sapphire"
-local addonFolder = hubFolder.."/Addons"
-
-if not isfolder(hubFolder) then
-makefolder(hubFolder)
-end
-
-if not isfolder(addonFolder) then
-makefolder(addonFolder)
-end
-
-Starring = Starring or {}
-Starring.Addons = {}
+Sapphire = Sapphire or {}
+Sapphire.Addons = {}
 
 for _, file in ipairs(listfiles(addonFolder)) do
 if file:sub(-4) == ".lua" or file:sub(-4) == ".txt" then
@@ -6274,7 +6605,7 @@ local success, addon = pcall(function()
 return loadstring(readfile(file))()
 end)
 if success and type(addon) == "table" then
-table.insert(Starring.Addons, addon)
+table.insert(Sapphire.Addons, addon)
 
 AddonBox:AddToggle(addon.Text, {
 Text = addon.Text,
@@ -6285,7 +6616,6 @@ end
 
 end
 end
-
 
 local folder_path = "Sapphire"
 local file_path = "Doors"
@@ -6305,17 +6635,9 @@ SaveManager:GetAutoloadConfig()
 SaveManager:LoadAutoloadConfig()
 SaveManager:SaveAutoloadConfig()
 
-Tabs.Info:UpdateWarningBox({
-Title = "所有的使用者必看",
-Text = "［<font color=\"rgb(255,0,0)\">流fake人</font>］B站UID:604520016\n<font color=\"rgb(255,0,0)\">流fake人</font> 我不知道为啥你们骂他",
-IsNormal = true,
-Visible = true,
-LockSize = true,
-})
-
 Tabs.Addons:UpdateWarningBox({
 Title = "警告",
-Text = "插件添加路径 (Sapphire/Addons)",
+Text = "插件添加成功 (Sapphire/Addons)",
 IsNormal = false,
 Visible = true,
 LockSize = true,
